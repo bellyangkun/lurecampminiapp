@@ -1,5 +1,7 @@
 {
   "usingComponents": {
     "shoot-confirm": "/components/shoot-confirm/index"
-  }
+  },
+  "navigationStyle": "default",
+  "disableScroll": false
 }

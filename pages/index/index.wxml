@@ -1,12 +1,12 @@
-<!--pages/index/index.wxml - 主页: 顶部 + 地图 + 工具栏 + 拍照 fab + 底部抽屉占位-->
+<!--pages/index/index.wxml - 主页: 地图 + 顶部搜索面板 + 右下角 FAB (v0.4 重构)
+  布局层级:
+  - map          全屏底层
+  - overlay-top  顶部搜索面板 (目的地 + 类型过滤 + 路线信息)
+  - fab-stack    右下角悬浮按钮 (拍照打卡 + 定位)
+  - shoot-confirm 全屏拍照确认面板
+-->
 <view class="page">
-  <!-- 顶部 header (固定) -->
-  <view class="topbar">
-    <view class="brand">🏕️ 露营地导航</view>
-    <view class="subtitle">选择活动地点, 跟随路线前进</view>
-  </view>
-
-  <!-- 地图 (占满, 覆盖 0-底部 tabBar) -->
+  <!-- 地图 -->
   <map
     class="map"
     latitude="{{latitude || 31.481527}}"
@@ -20,53 +20,72 @@
     bindmarkertap="onMarkerTap"
   ></map>
 
-  <!-- 浮动控制层: 目标 + 类型 chip -->
+  <!-- 顶部搜索面板 -->
   <view class="overlay-top">
+    <!-- 目的地选择器 -->
     <view class="dest-bar">
       <picker mode="selector" range="{{points}}" range-key="name" value="{{selectedDestIdx}}" bindchange="onDestChange">
         <view class="dest-picker">
-          <text class="dest-pin">📍</text>
-          <text class="dest-label">目标</text>
-          <text class="dest-value">{{selectedDestId ? (selectedDestName || '已选') : '-- 请选择 --'}}</text>
+          <view class="dest-icon" aria-hidden="true">📍</view>
+          <view class="dest-text">
+            <text class="dest-label">要去哪里？</text>
+            <text class="dest-value">{{selectedDestId ? (selectedDestName || '已选') : '选择活动地点'}}</text>
+          </view>
           <text class="dest-arrow">▼</text>
         </view>
       </picker>
-      <button class="end-nav-btn {{endNavBtnShown ? '' : 'hidden'}}" bindtap="onEndNavTap" style="display:{{endNavBtnShown ? 'inline-block' : 'none'}}">✕ 结束导航</button>
+      <button
+        class="end-nav-btn {{endNavBtnShown ? '' : 'hidden'}}"
+        bindtap="onEndNavTap"
+        style="display:{{endNavBtnShown ? 'flex' : 'none'}}"
+        aria-label="结束导航"
+      >✕</button>
     </view>
 
-    <scroll-view class="type-chips" scroll-x="true" enhanced="true" enable-flex="true" show-scrollbar="{{false}}">
-      <view class="chip {{typeFilter === t.key ? 'active' : ''}}" wx:for="{{types}}" wx:key="key" data-type="{{t.key}}" bindtap="onTypeChipTap">{{t.label}}</view>
+    <!-- 类型过滤 chips -->
+    <scroll-view
+      class="type-chips"
+      scroll-x
+      enhanced
+      show-scrollbar="{{false}}"
+      scroll-with-animation
+    >
+      <view class="chip-list">
+        <view
+          wx:for="{{types}}"
+          wx:key="key"
+          class="chip {{typeFilter === item.key ? 'active' : ''}}"
+          data-type="{{item.key}}"
+          bindtap="onTypeChipTap"
+        >{{item.icon}} {{item.label}}</view>
+      </view>
     </scroll-view>
+
+    <!-- 路线信息 (选中目标后显示) -->
+    <view class="route-row" wx:if="{{selectedDestId}}">
+      <view class="route-stat">
+        <text class="route-stat-num">{{distance || '--'}}</text>
+        <text class="route-stat-unit">米 · 约 {{walkMins || '--'}} 分钟</text>
+      </view>
+      <button class="route-action route-walk" bindtap="onWalkNavTap">
+        <text class="action-icon">🚶</text>
+        <text>路线导航</text>
+      </button>
+    </view>
   </view>
 
-  <!-- 拍照 fab (右下角) -->
+  <!-- 右下角 FAB 组 -->
   <view class="fab-stack">
-    <button class="fab fab-shoot" bindtap="onShootFabTap" hover-class="none">
+    <button class="fab fab-shoot" bindtap="onShootFabTap" hover-class="fab-hover">
       <text class="fab-icon">📷</text>
       <text class="fab-label">拍照打卡</text>
     </button>
-    <button class="fab fab-locate" bindtap="onLocateTap" hover-class="none">📍</button>
+    <button class="fab fab-locate" bindtap="onLocateTap" hover-class="fab-hover" aria-label="定位到我">
+      <text class="fab-icon">📍</text>
+    </button>
   </view>
 
-  <!-- 底部面板 (路线信息) -->
-  <view class="bottom-panel" wx:if="{{selectedDestId}}">
-    <view class="panel-row">
-      <view class="panel-stat">
-        <text class="stat-num">{{distance || '--'}}</text>
-        <text class="stat-unit">米</text>
-      </view>
-      <view class="panel-stat">
-        <text class="stat-num">{{walkMins || '--'}}</text>
-        <text class="stat-unit">步行约 (分)</text>
-      </view>
-    </view>
-    <view class="panel-row">
-      <button class="nav-btn nav-walk" bindtap="onWalkNavTap">🚶 步行导航</button>
-      <button class="nav-btn nav-drive" bindtap="onDriveNavTap">🚗 驾车导航</button>
-    </view>
-  </view>
-
-  <!-- v0.2: 拍照确认面板 (重拍 / 用此照片提交打卡) -->
+  <!-- 拍照确认面板 -->
   <shoot-confirm
     visible="{{shootConfirm.visible}}"
     temp-file-path="{{shootConfirm.tempFilePath}}"
