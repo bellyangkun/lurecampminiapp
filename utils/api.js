@@ -30,7 +30,16 @@ module.exports = {
   getCheckinStats: (userId) => request('/checkins/stats?userId=' + encodeURIComponent(userId)),
   submitCheckin: (data) => request('/checkins', { method: 'POST', data }),
   getCouponTemplates: () => request('/coupons/templates'),
-  getMyCoupons: (userId) => request('/coupons/my?userId=' + encodeURIComponent(userId)),
+  // v0.7.3: 接受 {userId, phone} 对象 (后端 phone 聚合匿名 userId 老券)
+  getMyCoupons: (arg) => {
+    if (typeof arg === 'string') {
+      return request('/coupons/my?userId=' + encodeURIComponent(arg));
+    }
+    const qs = [];
+    if (arg.userId) qs.push('userId=' + encodeURIComponent(arg.userId));
+    if (arg.phone) qs.push('phone=' + encodeURIComponent(arg.phone));
+    return request('/coupons/my?' + qs.join('&'));
+  },
   issueCoupon: (data) => request('/coupons/issue', { method: 'POST', data }),
   redeemCoupon: (data) => request('/coupons/redeem', { method: 'POST', data }),
 

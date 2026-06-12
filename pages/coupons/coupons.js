@@ -37,7 +37,8 @@ Page({
   async loadMine() {
     this.setData({ loading: true });
     try {
-      const j = await getMyCoupons(getUserId());
+      const u = wx.getStorageSync('campsite_user') || {};
+      const j = await getMyCoupons({ userId: getUserId(), phone: u.phone || '' });
       this.setData({ mine: (j.data && j.data.coupons) || [], loading: false });
     } catch (e) {
       this.setData({ loading: false });
@@ -49,10 +50,11 @@ Page({
     const id = e.currentTarget.dataset.id;
     const tpl = this.data.templates.find(t => t.id === id);
     if (!tpl) return;
+    const u = wx.getStorageSync('campsite_user') || {};
     try {
-      await issueCoupon({ templateId: id, userId: getUserId() });
+      // v0.7.3: 传 phone 让后端做匿名→登录 userId 合并
+      await issueCoupon({ templateId: id, userId: getUserId(), phone: u.phone || '' });
       wx.showToast({ title: '领取成功', icon: 'success' });
-      // 刷新我的券数量
       this.loadMine();
     } catch (e) {
       wx.showToast({ title: '领取失败', icon: 'none' });

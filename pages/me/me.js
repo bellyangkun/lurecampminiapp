@@ -11,13 +11,14 @@ Page({
     getCheckinStats(getUserId()).then(j => {
       this.setData({ stats: j.data });
     }).catch(e => console.warn(e));
-    getMyCoupons(getUserId()).then(j => {
-      const list = (j.data && j.data.coupons) || [];
-      // 只算未使用 + 未过期的
-      const now = Date.now();
-      const active = list.filter(c => c.status === 'active' && (!c.expiresAt || c.expiresAt > now));
-      this.setData({ couponCount: active.length });
-    }).catch(e => console.warn(e));
+     const u = wx.getStorageSync('campsite_user') || {};
+     getMyCoupons({ userId: getUserId(), phone: u.phone || '' }).then(j => {
+       const list = (j.data && j.data.coupons) || [];
+       // 只算未使用 + 未过期的
+       const now = Date.now();
+       const active = list.filter(c => c.status === 'active' && (!c.expiresAt || c.expiresAt > now));
+       this.setData({ couponCount: active.length });
+     }).catch(e => console.warn(e));
   },
 
   onPhoneLoginTap() {
