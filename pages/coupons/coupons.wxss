@@ -1,0 +1,33 @@
+page { background: #fff5f5; }
+.page { padding: 24rpx; }
+
+.tabs { display: flex; background: #fff; border-radius: 12rpx; padding: 8rpx; margin-bottom: 24rpx; }
+.tab { flex: 1; text-align: center; padding: 16rpx 0; font-size: 28rpx; color: #666; border-radius: 8rpx; }
+.tab.active { background: linear-gradient(135deg, #E91E63, #F06292); color: #fff; font-weight: 700; }
+
+.list { padding-bottom: 24rpx; }
+.empty { text-align: center; color: #999; padding: 96rpx 0; }
+
+.coupon-card { display: flex; background: #fff; border-radius: 16rpx; margin-bottom: 20rpx; overflow: hidden; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.08); }
+.coupon-card.mine { opacity: 0.85; }
+
+.coupon-left { background: linear-gradient(135deg, #E91E63, #F06292); color: #fff; padding: 32rpx 24rpx; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 200rpx; }
+.coupon-card.mine .coupon-left { background: #999; }
+
+.coupon-amount { display: flex; align-items: baseline; }
+.amount-num { font-size: 64rpx; font-weight: 700; }
+.amount-unit { font-size: 24rpx; margin-left: 4rpx; }
+.amount-icon { font-size: 64rpx; }
+.coupon-condition { font-size: 22rpx; opacity: 0.9; margin-top: 8rpx; }
+
+.coupon-right { flex: 1; padding: 24rpx; display: flex; flex-direction: column; gap: 8rpx; }
+.coupon-name { font-size: 30rpx; font-weight: 700; color: #333; }
+.coupon-desc { font-size: 24rpx; color: #666; }
+.coupon-expire { font-size: 22rpx; color: #999; }
+.coupon-code { font-size: 22rpx; color: #FF6F00; font-family: monospace; }
+.coupon-status { font-size: 24rpx; padding: 4rpx 12rpx; border-radius: 4rpx; align-self: flex-start; margin-top: 4rpx; }
+.coupon-status.used { background: #e0e0e0; color: #666; }
+.coupon-status.unused { background: #c8e6c9; color: #2e7d32; }
+
+.claim-btn { margin-top: auto; align-self: flex-end; padding: 12rpx 28rpx; background: linear-gradient(135deg, #E91E63, #F06292); color: #fff; font-size: 26rpx; border-radius: 30rpx; font-weight: 600; }
+.claim-btn::after { border: none; }

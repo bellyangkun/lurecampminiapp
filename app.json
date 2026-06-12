@@ -1,0 +1,39 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/checkin/checkin",
+    "pages/coupons/coupons",
+    "pages/booking/booking",
+    "pages/ai/ai",
+    "pages/me/me"
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "露营地导航",
+    "navigationBarBackgroundColor": "#2e7d32",
+    "backgroundColor": "#f5f5f5"
+  },
+  "tabBar": {
+    "color": "#666",
+    "selectedColor": "#2e7d32",
+    "backgroundColor": "#fff",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/index/index",   "text": "导航" },
+      { "pagePath": "pages/checkin/checkin","text": "打卡" },
+      { "pagePath": "pages/coupons/coupons","text": "优惠" },
+      { "pagePath": "pages/booking/booking","text": "预约" },
+      { "pagePath": "pages/me/me",          "text": "我的" }
+    ]
+  },
+  "style": "v2",
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于显示你的位置, 推荐目的地和路线"
+    }
+  },
+  "requiredPrivateInfos": ["getLocation", "chooseLocation", "onLocationChange", "startLocationUpdate"]
+}

@@ -1,0 +1,55 @@
+<view class="page">
+  <view class="tabs">
+    <view class="tab {{activeTab === 'all' ? 'active' : ''}}" data-tab="all" bindtap="onTabTap">可领取</view>
+    <view class="tab {{activeTab === 'mine' ? 'active' : ''}}" data-tab="mine" bindtap="onTabTap">我的券 ({{mine.length}})</view>
+  </view>
+
+  <!-- 可领取 tab -->
+  <view class="list" wx:if="{{activeTab === 'all'}}">
+    <view class="empty" wx:if="{{!loading && !templates.length}}">暂无可领取的券</view>
+    <view class="coupon-card" wx:for="{{templates}}" wx:key="id">
+      <view class="coupon-left">
+        <view class="coupon-amount" wx:if="{{item.type === 'cash'}}">
+          <text class="amount-num">{{item.amount}}</text>
+          <text class="amount-unit">元</text>
+        </view>
+        <view class="coupon-amount" wx:elif="{{item.type === 'discount'}}">
+          <text class="amount-num">{{item.discount}}</text>
+          <text class="amount-unit">折</text>
+        </view>
+        <view class="coupon-amount" wx:else>
+          <text class="amount-icon">🎁</text>
+        </view>
+        <view class="coupon-condition" wx:if="{{item.minSpend}}">满 {{item.minSpend}} 元可用</view>
+      </view>
+      <view class="coupon-right">
+        <view class="coupon-name">{{item.name}}</view>
+        <view class="coupon-desc">{{item.description || '度假村通用'}}</view>
+        <view class="coupon-expire">有效期至 {{item.expireAt || '长期'}}</view>
+        <button class="claim-btn" data-id="{{item.id}}" bindtap="onClaimTap">立即领取</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 我的券 tab -->
+  <view class="list" wx:if="{{activeTab === 'mine'}}">
+    <view class="empty" wx:if="{{!loading && !mine.length}}">还没有券, 去领取一张吧</view>
+    <view class="coupon-card mine" wx:for="{{mine}}" wx:key="id">
+      <view class="coupon-left">
+        <view class="coupon-amount" wx:if="{{item.type === 'cash'}}">
+          <text class="amount-num">{{item.amount}}</text>
+          <text class="amount-unit">元</text>
+        </view>
+        <view class="coupon-amount" wx:elif="{{item.type === 'discount'}}">
+          <text class="amount-num">{{item.discount}}</text>
+          <text class="amount-unit">折</text>
+        </view>
+      </view>
+      <view class="coupon-right">
+        <view class="coupon-name">{{item.name}}</view>
+        <view class="coupon-code">券码: {{item.code}}</view>
+        <view class="coupon-status {{item.status}}">{{item.status === 'used' ? '已使用' : '未使用'}}</view>
+      </view>
+    </view>
+  </view>
+</view>

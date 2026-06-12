@@ -1,0 +1,20 @@
+page { background: #f5f5f5; }
+.page { padding: 48rpx 32rpx; }
+.header { margin-bottom: 48rpx; }
+.title { display: block; font-size: 48rpx; font-weight: 700; color: #2e7d32; }
+.subtitle { display: block; font-size: 26rpx; color: #999; margin-top: 8rpx; }
+
+.form { background: #fff; border-radius: 12rpx; padding: 16rpx 24rpx; }
+.form-item { display: flex; align-items: center; padding: 24rpx 0; border-bottom: 1rpx solid #f0f0f0; }
+.form-item:last-child { border-bottom: none; }
+.label { width: 140rpx; font-size: 28rpx; color: #333; }
+.input { flex: 1; font-size: 30rpx; }
+.send-btn { font-size: 24rpx; padding: 12rpx 20rpx; background: #2e7d32; color: #fff; border-radius: 6rpx; }
+.send-btn[disabled] { background: #ccc; }
+.send-btn::after { border: none; }
+
+.dev-code { font-size: 24rpx; color: #FF6F00; padding: 24rpx 0; text-align: center; }
+.dev-code-num { font-weight: 700; font-size: 32rpx; }
+
+.login-btn { width: 100%; padding: 24rpx; background: linear-gradient(135deg, #2e7d32, #4caf50); color: #fff; font-size: 32rpx; font-weight: 700; border-radius: 12rpx; margin-top: 48rpx; }
+.login-btn::after { border: none; }

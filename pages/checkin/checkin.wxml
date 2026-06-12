@@ -1,0 +1,18 @@
+<view class="page">
+  <view class="header">
+    <text class="title">🏆 我的打卡</text>
+    <text class="subtitle">已集 <text class="num">{{stats.unique}}</text> 个印章</text>
+  </view>
+
+  <view class="latest">
+    <view class="section-title">📜 最近打卡</view>
+    <view class="empty" wx:if="{{!loading && !stats.latest.length}}">还没打卡, 出发吧!</view>
+    <view class="log-item" wx:for="{{stats.latest}}" wx:key="id">
+      <view class="log-main">
+        <text class="log-name">🏆 {{item.pointName}}</text>
+        <text class="log-time">{{item.timestampText}}</text>
+      </view>
+      <image wx:if="{{item.shotUrl}}" class="log-thumb" src="{{item.shotUrl}}" data-url="{{item.shotUrl}}" bindtap="onThumbTap" mode="aspectFill" />
+    </view>
+  </view>
+</view>

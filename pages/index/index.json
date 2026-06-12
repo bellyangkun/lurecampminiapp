@@ -1,0 +1,5 @@
+{
+  "usingComponents": {
+    "shoot-confirm": "/components/shoot-confirm/index"
+  }
+}

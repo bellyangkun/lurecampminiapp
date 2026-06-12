@@ -1,0 +1,5 @@
+<view class="placeholder">
+  <text class="emoji">📋</text>
+  <text class="title">活动预约</text>
+  <text class="hint">v0.2 上线</text>
+</view>
