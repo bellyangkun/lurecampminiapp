@@ -23,5 +23,9 @@ Page({
     const url = e.currentTarget.dataset.url;
     if (!url) return;
     wx.previewImage({ urls: [url], current: url });
+  },
+
+  goIndex() {
+    wx.switchTab({ url: '/pages/index/index' });
   }
 });

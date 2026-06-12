@@ -1,17 +1,60 @@
+<!--pages/coupons/coupons.wxml - 优惠券页 v0.2 重构
+  - 顶部头图
+  - 胶囊 tab 切换
+  - 票券式卡片（带缺口）
+  - 加载骨架 + 空状态引导
+-->
 <view class="page">
+  <!-- 顶部头图 -->
+  <view class="header">
+    <view class="header-main">
+      <text class="title">🎫 优惠券</text>
+      <text class="subtitle">领取度假村专属福利</text>
+    </view>
+    <view class="header-icon">🎟️</view>
+  </view>
+
+  <!-- Tab 切换 -->
   <view class="tabs">
-    <view class="tab {{activeTab === 'all' ? 'active' : ''}}" data-tab="all" bindtap="onTabTap">可领取</view>
-    <view class="tab {{activeTab === 'mine' ? 'active' : ''}}" data-tab="mine" bindtap="onTabTap">我的券 ({{mine.length}})</view>
+    <view
+      class="tab {{activeTab === 'all' ? 'active' : ''}}"
+      data-tab="all"
+      bindtap="onTabTap"
+    >可领取</view>
+    <view
+      class="tab {{activeTab === 'mine' ? 'active' : ''}}"
+      data-tab="mine"
+      bindtap="onTabTap"
+    >我的券 ({{mine.length}})</view>
+  </view>
+
+  <!-- 加载骨架屏 -->
+  <view class="skeleton-list" wx:if="{{loading}}">
+    <view class="skeleton-card" wx:for="{{2}}" wx:key="*this">
+      <view class="skeleton-left"></view>
+      <view class="skeleton-right">
+        <view class="skeleton-line short"></view>
+        <view class="skeleton-line"></view>
+        <view class="skeleton-line"></view>
+      </view>
+    </view>
   </view>
 
   <!-- 可领取 tab -->
-  <view class="list" wx:if="{{activeTab === 'all'}}">
-    <view class="empty" wx:if="{{!loading && !templates.length}}">暂无可领取的券</view>
-    <view class="coupon-card" wx:for="{{templates}}" wx:key="id">
+  <view class="list" wx:if="{{activeTab === 'all' && !loading}}">
+    <view class="empty" wx:if="{{!templates.length}}">
+      <text class="empty-icon">🎫</text>
+      <text class="empty-title">暂无可领取的券</text>
+      <text class="empty-text">稍后再来看看吧</text>
+    </view>
+
+    <view class="coupon-card {{item.type}}" wx:for="{{templates}}" wx:key="id">
       <view class="coupon-left">
+        <view class="coupon-notch top"></view>
+        <view class="coupon-notch bottom"></view>
         <view class="coupon-amount" wx:if="{{item.type === 'cash'}}">
+          <text class="amount-symbol">¥</text>
           <text class="amount-num">{{item.amount}}</text>
-          <text class="amount-unit">元</text>
         </view>
         <view class="coupon-amount" wx:elif="{{item.type === 'discount'}}">
           <text class="amount-num">{{item.discount}}</text>
@@ -20,35 +63,57 @@
         <view class="coupon-amount" wx:else>
           <text class="amount-icon">🎁</text>
         </view>
-        <view class="coupon-condition" wx:if="{{item.minSpend}}">满 {{item.minSpend}} 元可用</view>
+        <view class="coupon-condition" wx:if="{{item.minSpend}}">满 {{item.minSpend}} 可用</view>
       </view>
       <view class="coupon-right">
+        <view class="coupon-header">
+          <view class="coupon-type-tag {{item.type}}">{{item.type === 'cash' ? '代金券' : item.type === 'discount' ? '折扣券' : '体验券'}}</view>
+        </view>
         <view class="coupon-name">{{item.name}}</view>
         <view class="coupon-desc">{{item.description || '度假村通用'}}</view>
-        <view class="coupon-expire">有效期至 {{item.expireAt || '长期'}}</view>
-        <button class="claim-btn" data-id="{{item.id}}" bindtap="onClaimTap">立即领取</button>
+        <view class="coupon-footer">
+          <view class="coupon-expire">有效期至 {{item.expireAt || '长期'}}</view>
+          <button class="claim-btn" data-id="{{item.id}}" bindtap="onClaimTap">领取</button>
+        </view>
       </view>
     </view>
   </view>
 
   <!-- 我的券 tab -->
-  <view class="list" wx:if="{{activeTab === 'mine'}}">
-    <view class="empty" wx:if="{{!loading && !mine.length}}">还没有券, 去领取一张吧</view>
-    <view class="coupon-card mine" wx:for="{{mine}}" wx:key="id">
+  <view class="list" wx:if="{{activeTab === 'mine' && !loading}}">
+    <view class="empty" wx:if="{{!mine.length}}">
+      <text class="empty-icon">🎫</text>
+      <text class="empty-title">还没有券</text>
+      <text class="empty-text">去领一张，到店消费更优惠</text>
+      <button class="empty-btn" bindtap="switchToAll">去领券 →</button>
+    </view>
+
+    <view class="coupon-card mine {{item.type}} {{item.status}}" wx:for="{{mine}}" wx:key="id">
       <view class="coupon-left">
+        <view class="coupon-notch top"></view>
+        <view class="coupon-notch bottom"></view>
         <view class="coupon-amount" wx:if="{{item.type === 'cash'}}">
+          <text class="amount-symbol">¥</text>
           <text class="amount-num">{{item.amount}}</text>
-          <text class="amount-unit">元</text>
         </view>
         <view class="coupon-amount" wx:elif="{{item.type === 'discount'}}">
           <text class="amount-num">{{item.discount}}</text>
           <text class="amount-unit">折</text>
         </view>
+        <view class="coupon-amount" wx:else>
+          <text class="amount-icon">🎁</text>
+        </view>
       </view>
       <view class="coupon-right">
+        <view class="coupon-header">
+          <view class="coupon-type-tag {{item.type}}">{{item.type === 'cash' ? '代金券' : item.type === 'discount' ? '折扣券' : '体验券'}}</view>
+          <view class="coupon-status {{item.status}}">{{item.status === 'used' ? '已使用' : '未使用'}}</view>
+        </view>
         <view class="coupon-name">{{item.name}}</view>
-        <view class="coupon-code">券码: {{item.code}}</view>
-        <view class="coupon-status {{item.status}}">{{item.status === 'used' ? '已使用' : '未使用'}}</view>
+        <view class="coupon-code" bindtap="onCopyCode" data-code="{{item.code}}">
+          <text>券码: {{item.code}}</text>
+          <text class="copy-hint">点击复制</text>
+        </view>
       </view>
     </view>
   </view>

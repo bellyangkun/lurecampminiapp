@@ -57,5 +57,21 @@ Page({
     } catch (e) {
       wx.showToast({ title: '领取失败', icon: 'none' });
     }
+  },
+
+  onCopyCode(e) {
+    const code = e.currentTarget.dataset.code;
+    if (!code) return;
+    wx.setClipboardData({
+      data: code,
+      success: () => {
+        wx.showToast({ title: '券码已复制', icon: 'success' });
+      }
+    });
+  },
+
+  switchToAll() {
+    this.setData({ activeTab: 'all' });
+    this.loadTemplates();
   }
 });

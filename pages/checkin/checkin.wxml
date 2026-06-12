@@ -1,18 +1,80 @@
+<!--pages/checkin/checkin.wxml - 我的打卡页 v0.2 重构
+  - 顶部橙渐变统计头 + 印章大数字
+  - 统计小卡片（累计打卡 / 集章数）
+  - 最近打卡列表卡片化
+  - 加载骨架屏 + 空状态引导
+-->
 <view class="page">
+  <!-- 顶部统计头 -->
   <view class="header">
-    <text class="title">🏆 我的打卡</text>
-    <text class="subtitle">已集 <text class="num">{{stats.unique}}</text> 个印章</text>
+    <view class="header-main">
+      <text class="title">🏆 我的打卡</text>
+      <text class="subtitle">记录你在乡悦华亭的每一次探索</text>
+    </view>
+    <view class="stamp-circle">
+      <text class="stamp-num">{{stats.unique || 0}}</text>
+      <text class="stamp-label">枚印章</text>
+    </view>
   </view>
 
+  <!-- 统计小卡片 -->
+  <view class="stats-row">
+    <view class="stat-card">
+      <text class="stat-value">{{stats.latest.length || 0}}</text>
+      <text class="stat-label">累计打卡</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-value">{{stats.unique || 0}}</text>
+      <text class="stat-label">集章数</text>
+    </view>
+  </view>
+
+  <!-- 最近打卡 -->
   <view class="latest">
-    <view class="section-title">📜 最近打卡</view>
-    <view class="empty" wx:if="{{!loading && !stats.latest.length}}">还没打卡, 出发吧!</view>
-    <view class="log-item" wx:for="{{stats.latest}}" wx:key="id">
-      <view class="log-main">
-        <text class="log-name">🏆 {{item.pointName}}</text>
-        <text class="log-time">{{item.timestampText}}</text>
+    <view class="section-header">
+      <text class="section-title">📜 最近打卡</text>
+      <text class="section-count" wx:if="{{!loading && stats.latest.length}}">共 {{stats.latest.length}} 次</text>
+    </view>
+
+    <!-- 加载骨架屏 -->
+    <view class="skeleton-list" wx:if="{{loading}}">
+      <view class="skeleton-row" wx:for="{{3}}" wx:key="*this">
+        <view class="skeleton-badge"></view>
+        <view class="skeleton-body">
+          <view class="skeleton-line short"></view>
+          <view class="skeleton-line"></view>
+        </view>
+        <view class="skeleton-thumb"></view>
       </view>
-      <image wx:if="{{item.shotUrl}}" class="log-thumb" src="{{item.shotUrl}}" data-url="{{item.shotUrl}}" bindtap="onThumbTap" mode="aspectFill" />
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty" wx:if="{{!loading && !stats.latest.length}}">
+      <text class="empty-icon">🏕️</text>
+      <text class="empty-title">还没打卡</text>
+      <text class="empty-text">去度假村各处探索，留下你的足迹吧</text>
+      <button class="empty-btn" bindtap="goIndex">去导航 →</button>
+    </view>
+
+    <!-- 打卡列表 -->
+    <view class="log-list" wx:if="{{!loading && stats.latest.length}}">
+      <view class="log-item" wx:for="{{stats.latest}}" wx:key="id">
+        <view class="log-badge">{{index + 1}}</view>
+        <view class="log-main">
+          <text class="log-name">{{item.pointName}}</text>
+          <text class="log-time">{{item.timestampText}}</text>
+        </view>
+        <image
+          wx:if="{{item.shotUrl}}"
+          class="log-thumb"
+          src="{{item.shotUrl}}"
+          data-url="{{item.shotUrl}}"
+          bindtap="onThumbTap"
+          mode="aspectFill"
+          lazy-load
+        />
+        <view wx:else class="log-no-thumb">🥾</view>
+      </view>
     </view>
   </view>
 </view>
