@@ -1,16 +1,16 @@
-<view class="backdrop {{visible ? 'show' : 'hidden'}}" bindtap="onCloseTap">
-  <view class="modal" catchtap="noop">
-    <view class="header">
-      <text class="title">📷 {{pointName}}</text>
-      <text class="close" bindtap="onCloseTap">✕</text>
+<view class="sc-backdrop {{visible ? '' : 'hidden'}}" bindtap="onCloseTap">
+  <view class="sc-modal" catchtap="noop">
+    <view class="sc-header">
+      <text class="sc-title">📷 {{pointName}}</text>
+      <text class="sc-close" bindtap="onCloseTap">✕</text>
     </view>
-    <image class="preview" src="{{tempFilePath}}" mode="aspectFit" />
-    <view class="actions">
-      <button class="btn btn-retake" bindtap="onRetakeTap" disabled="{{uploading}}">🔄 重拍</button>
-      <button class="btn btn-submit" bindtap="onSubmitTap" disabled="{{uploading}}">
+    <image class="sc-preview" src="{{tempFilePath}}" mode="aspectFit" />
+    <view class="sc-actions">
+      <button class="sc-btn sc-btn-retake" bindtap="onRetakeTap" disabled="{{uploading}}">🔄 重拍</button>
+      <button class="sc-btn sc-btn-submit" bindtap="onSubmitTap" disabled="{{uploading}}">
         {{uploading ? '上传中...' : (isOther ? '📤 提交主动拍照' : '🏆 用此照片提交打卡')}}
       </button>
     </view>
-    <view class="hint">{{isOther ? '当前不在 POI 范围内, 提交不计入印章奖励' : '提交后将获得印章 + 上传照片'}}</view>
+    <view class="sc-hint">{{isOther ? '当前不在 POI 范围内, 提交不计入印章奖励' : '提交后将获得印章 + 上传照片'}}</view>
   </view>
 </view>

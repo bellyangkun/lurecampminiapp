@@ -34,7 +34,7 @@
       <button class="end-nav-btn {{endNavBtnShown ? '' : 'hidden'}}" bindtap="onEndNavTap" style="display:{{endNavBtnShown ? 'inline-block' : 'none'}}">✕ 结束导航</button>
     </view>
 
-    <scroll-view class="type-chips" scroll-x="true" enhanced="true" show-scrollbar="{{false}}">
+    <scroll-view class="type-chips" scroll-x="true" enhanced="true" enable-flex="true" show-scrollbar="{{false}}">
       <view class="chip {{typeFilter === t.key ? 'active' : ''}}" wx:for="{{types}}" wx:key="key" data-type="{{t.key}}" bindtap="onTypeChipTap">{{t.label}}</view>
     </scroll-view>
   </view>
