@@ -1,20 +1,195 @@
-page { background: #f5f5f5; }
-.page { padding: 48rpx 32rpx; }
-.header { margin-bottom: 48rpx; }
-.title { display: block; font-size: 48rpx; font-weight: 700; color: #2e7d32; }
-.subtitle { display: block; font-size: 26rpx; color: #999; margin-top: 8rpx; }
+/* pages/login/login.wxss - 登录页 v0.2 重构
+ * 设计方向:
+ * - 绿渐变全屏背景
+ * - 顶部品牌圆形图标
+ * - 白色表单卡片
+ * - 圆形输入图标
+ * - 白色大登录按钮
+ */
 
-.form { background: #fff; border-radius: 12rpx; padding: 16rpx 24rpx; }
-.form-item { display: flex; align-items: center; padding: 24rpx 0; border-bottom: 1rpx solid #f0f0f0; }
-.form-item:last-child { border-bottom: none; }
-.label { width: 140rpx; font-size: 28rpx; color: #333; }
-.input { flex: 1; font-size: 30rpx; }
-.send-btn { font-size: 24rpx; padding: 12rpx 20rpx; background: #2e7d32; color: #fff; border-radius: 6rpx; }
-.send-btn[disabled] { background: #ccc; }
+page {
+  background: linear-gradient(135deg, #2e7d32 0%, #43a047 50%, #66bb6a 100%);
+  min-height: 100vh;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 80rpx 48rpx 48rpx;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* ===== 顶部品牌区 ===== */
+.header {
+  text-align: center;
+  margin-bottom: 56rpx;
+}
+
+.brand-circle {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24rpx;
+  backdrop-filter: blur(4rpx);
+}
+
+.brand-icon {
+  font-size: 88rpx;
+  line-height: 1;
+}
+
+.title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 2rpx;
+}
+
+.subtitle {
+  display: block;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 12rpx;
+}
+
+/* ===== 表单卡片 ===== */
+.form-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+  margin-bottom: 40rpx;
+}
+
+.form-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: center;
+  margin-bottom: 28rpx;
+}
+
+.form-item {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f1f5f9;
+}
+
+.form-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.input-icon-wrap {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: #e8f5e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.input-icon {
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.input {
+  flex: 1;
+  font-size: 30rpx;
+  color: #1e293b;
+  padding: 8rpx 0;
+  min-height: 56rpx;
+}
+
+.input-code {
+  min-width: 0;
+}
+
+.send-btn {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  font-weight: 700;
+  padding: 12rpx 20rpx;
+  background: linear-gradient(135deg, #FF6F00, #FF8F00);
+  color: #fff;
+  border-radius: 28rpx;
+  white-space: nowrap;
+  box-shadow: 0 2rpx 8rpx rgba(255, 111, 0, 0.25);
+}
+
 .send-btn::after { border: none; }
 
-.dev-code { font-size: 24rpx; color: #FF6F00; padding: 24rpx 0; text-align: center; }
-.dev-code-num { font-weight: 700; font-size: 32rpx; }
+.send-btn[disabled] {
+  background: #e2e8f0;
+  color: #94a3b8;
+  box-shadow: none;
+}
 
-.login-btn { width: 100%; padding: 24rpx; background: linear-gradient(135deg, #2e7d32, #4caf50); color: #fff; font-size: 32rpx; font-weight: 700; border-radius: 12rpx; margin-top: 48rpx; }
+.dev-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  font-size: 24rpx;
+  color: #FF6F00;
+  margin-top: 20rpx;
+  padding: 12rpx;
+  background: #fff3e0;
+  border-radius: 12rpx;
+}
+
+.dev-code-num {
+  font-size: 32rpx;
+  font-weight: 800;
+  font-family: monospace;
+}
+
+/* ===== 登录按钮 ===== */
+.login-btn {
+  width: 100%;
+  padding: 28rpx 0;
+  background: #fff;
+  color: #2e7d32;
+  font-size: 32rpx;
+  font-weight: 800;
+  border-radius: 50rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+  border: none;
+  transition: transform 0.12s;
+}
+
 .login-btn::after { border: none; }
+
+.login-btn:not([disabled]):active {
+  transform: scale(0.98);
+  opacity: 0.95;
+}
+
+.login-btn[disabled] { opacity: 0.7; }
+
+/* ===== 协议 ===== */
+.agreement {
+  text-align: center;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 32rpx;
+  line-height: 1.6;
+}
+
+.link {
+  color: #fff;
+  text-decoration: underline;
+  margin: 0 4rpx;
+}

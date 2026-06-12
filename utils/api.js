@@ -25,6 +25,8 @@ module.exports = {
   request,
   getPoints: () => request('/points'),
   getActivities: () => request('/activities'),
+  getMyBookings: (userId) => request('/bookings?userId=' + encodeURIComponent(userId)),
+  submitBooking: (data) => request('/bookings', { method: 'POST', data }),
   getCheckinStats: (userId) => request('/checkins/stats?userId=' + encodeURIComponent(userId)),
   submitCheckin: (data) => request('/checkins', { method: 'POST', data }),
   getCouponTemplates: () => request('/coupons/templates'),
@@ -80,4 +82,5 @@ module.exports = {
   },
   sendSms: (phone) => request('/sms/send', { method: 'POST', data: { phone } }),
   wxLogin: (code, phone) => request('/auth/login', { method: 'POST', data: { code, phone } }),
+  aiChat: (data) => request('/ai', { method: 'POST', data }),
 };

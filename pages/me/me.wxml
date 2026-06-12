@@ -1,31 +1,94 @@
+<!--pages/me/me.wxml - 我的页 v0.2 重构
+  - 顶部绿渐变资料头
+  - 重叠式统计卡片
+  - 分组菜单列表
+  - 底部度假村信息
+-->
 <view class="page">
+  <!-- 顶部资料头 -->
   <view class="header">
-    <view class="avatar">🏕️</view>
-    <view class="info">
-      <text class="nickname">{{user.nickname || '游客'}}</text>
-      <text class="uid">ID: {{user.userId}}</text>
+    <view class="header-bg"></view>
+    <view class="profile">
+      <view class="avatar-wrap">
+        <text class="avatar">🏕️</text>
+      </view>
+      <view class="info">
+        <text class="nickname">{{user.nickname || '游客'}}</text>
+        <text class="uid">ID: {{user.userId}}</text>
+      </view>
+      <button
+        class="login-btn"
+        wx:if="{{!user.loggedIn}}"
+        bindtap="onPhoneLoginTap"
+        hover-class="login-btn-active"
+      >登录 / 注册</button>
+      <view wx:else class="login-badge">已登录</view>
     </view>
-    <button class="login-btn" wx:if="{{!user.loggedIn}}" bindtap="onPhoneLoginTap">登录</button>
   </view>
 
-  <view class="stats">
-    <view class="stat-item">
+  <!-- 统计卡片 -->
+  <view class="stats-card">
+    <view class="stat-item" bindtap="onCheckinTap" hover-class="stat-item-active">
+      <text class="stat-icon">🏆</text>
       <text class="stat-num">{{stats.unique || 0}}</text>
       <text class="stat-label">已集印章</text>
     </view>
-    <view class="stat-item">
-      <text class="stat-num">0</text>
+    <view class="stat-divider"></view>
+    <view class="stat-item" bindtap="onCouponTap" hover-class="stat-item-active">
+      <text class="stat-icon">🎫</text>
+      <text class="stat-num">{{couponCount || 0}}</text>
       <text class="stat-label">优惠券</text>
     </view>
-    <view class="stat-item">
+    <view class="stat-divider"></view>
+    <view class="stat-item" bindtap="onBookingTap" hover-class="stat-item-active">
+      <text class="stat-icon">📅</text>
       <text class="stat-num">0</text>
-      <text class="stat-label">预约</text>
+      <text class="stat-label">我的预约</text>
     </view>
   </view>
 
-  <view class="menu">
-    <view class="menu-item">📞 呼叫客服</view>
-    <view class="menu-item">⚙️ 设置</view>
-    <view class="menu-item">ℹ️ 关于</view>
+  <!-- 我的服务 -->
+  <view class="menu-card">
+    <view class="menu-title">我的服务</view>
+    <view class="menu-group">
+      <view class="menu-item" bindtap="onCouponTap" hover-class="menu-item-active">
+        <text class="menu-icon">🎫</text>
+        <text class="menu-text">我的优惠券</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-item" bindtap="onCheckinTap" hover-class="menu-item-active">
+        <text class="menu-icon">🏆</text>
+        <text class="menu-text">我的打卡</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-item" bindtap="onBookingTap" hover-class="menu-item-active">
+        <text class="menu-icon">📅</text>
+        <text class="menu-text">我的预约</text>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 帮助与服务 -->
+  <view class="menu-card">
+    <view class="menu-title">帮助与服务</view>
+    <view class="menu-group">
+      <view class="menu-item" bindtap="onAiTap" hover-class="menu-item-active">
+        <text class="menu-icon">🤖</text>
+        <text class="menu-text">AI 客服</text>
+        <text class="menu-arrow">›</text>
+      </view>
+      <view class="menu-item" bindtap="onCallTap" hover-class="menu-item-active">
+        <text class="menu-icon">📞</text>
+        <text class="menu-text">呼叫前台</text>
+        <text class="menu-extra">021-59978686</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部信息 -->
+  <view class="footer">
+    <text class="footer-text">乡悦华亭度假村 · 霜竹公路 518 号</text>
+    <text class="footer-text">预约热线: (021) 59978686</text>
   </view>
 </view>

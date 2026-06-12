@@ -109,7 +109,7 @@
           <view class="coupon-type-tag {{item.type}}">{{item.type === 'cash' ? '代金券' : item.type === 'discount' ? '折扣券' : '体验券'}}</view>
           <view class="coupon-status {{item.status}}">{{item.status === 'used' ? '已使用' : '未使用'}}</view>
         </view>
-        <view class="coupon-name">{{item.name}}</view>
+        <view class="coupon-name">{{item.tplName || item.name || '优惠券'}}</view>
         <view class="coupon-code" bindtap="onCopyCode" data-code="{{item.code}}">
           <text>券码: {{item.code}}</text>
           <text class="copy-hint">点击复制</text>

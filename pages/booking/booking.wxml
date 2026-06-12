@@ -1,5 +1,136 @@
-<view class="placeholder">
-  <text class="emoji">📋</text>
-  <text class="title">活动预约</text>
-  <text class="hint">v0.2 上线</text>
+<!--pages/booking/booking.wxml - 活动预约页 v0.2 重构
+  - 顶部橙渐变头图
+  - 胶囊 tab 切换
+  - 类型筛选 chips
+  - 活动卡片优化
+  - 我的预约卡片 + 状态标签
+  - 预约表单弹窗
+-->
+<view class="page">
+  <!-- 顶部头图 -->
+  <view class="header">
+    <view class="header-main">
+      <text class="title">📋 活动预约</text>
+      <text class="subtitle">度假村活动 / 餐饮 / 酒店预约</text>
+    </view>
+  </view>
+
+  <!-- Tab 切换 -->
+  <view class="tabs">
+    <view
+      class="tab {{activeTab === 'list' ? 'active' : ''}}"
+      data-tab="list"
+      bindtap="onTabTap"
+    >可预约</view>
+    <view
+      class="tab {{activeTab === 'mine' ? 'active' : ''}}"
+      data-tab="mine"
+      bindtap="onTabTap"
+    >我的 ({{mine.length}})</view>
+  </view>
+
+  <!-- 类型筛选 (仅在可预约 tab 显示) -->
+  <scroll-view
+    class="kind-filter"
+    scroll-x
+    enhanced
+    show-scrollbar="{{false}}"
+    wx:if="{{activeTab === 'list'}}"
+  >
+    <view class="kind-list">
+      <view
+        wx:for="{{kindList}}"
+        wx:key="key"
+        class="kind-chip {{kindFilter === item.key ? 'active' : ''}}"
+        data-kind="{{item.key}}"
+        bindtap="onKindFilterTap"
+      >{{item.label}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 可预约列表 -->
+  <view class="list" wx:if="{{activeTab === 'list'}}">
+    <view class="empty" wx:if="{{!filteredActivities.length}}">
+      <text class="empty-icon">📋</text>
+      <text class="empty-title">暂无可预约项目</text>
+      <text class="empty-text">客服会不定期发布活动 / 餐饮 / 酒店</text>
+    </view>
+
+    <view class="book-card" wx:for="{{filteredActivities}}" wx:key="id">
+      <view class="book-top">
+        <view class="book-kind-tag {{item.kind || 'activity'}}">{{kindMeta[item.kind || 'activity'].icon}} {{kindMeta[item.kind || 'activity'].name}}</view>
+        <text class="book-cap">{{item.capacity || 0}} 人/期</text>
+      </view>
+      <view class="book-name">{{item.name}}</view>
+      <view class="book-desc" wx:if="{{item.description}}">{{item.description}}</view>
+      <view class="book-meta">
+        <text class="book-price"><text class="price-symbol">¥</text>{{item.price || 0}}<text class="price-unit">/人</text></text>
+        <view class="book-slots" wx:if="{{item.slots && item.slots.length}}">
+          <text class="slot-tag" wx:for="{{item.slots.slice(0, 3)}}" wx:key="*this" wx:for-item="slot">{{slot}}</text>
+        </view>
+      </view>
+      <button class="book-go" data-id="{{item.id}}" bindtap="onBookTap">立即预约</button>
+    </view>
+  </view>
+
+  <!-- 我的预约列表 -->
+  <view class="list" wx:if="{{activeTab === 'mine'}}">
+    <view class="empty" wx:if="{{!mine.length}}">
+      <text class="empty-icon">📋</text>
+      <text class="empty-title">还没有预约</text>
+      <text class="empty-text">去"可预约"找一个感兴趣的项目</text>
+    </view>
+
+    <view class="mine-card {{item.status}}" wx:for="{{mine}}" wx:key="id">
+      <view class="mine-head">
+        <text class="mine-name">{{item.activityName || item.name || '预约'}}</text>
+        <text class="mine-status-tag {{item.status}}">{{item.status === 'pending' ? '⏳ 待确认' : item.status === 'confirmed' ? '✓ 已确认' : '✕ 已取消'}}</text>
+      </view>
+      <view class="mine-body">
+        <view class="mine-row"><text class="mine-label">姓名</text><text class="mine-value">{{item.name}}</text></view>
+        <view class="mine-row"><text class="mine-label">手机</text><text class="mine-value">{{item.phone}}</text></view>
+        <view class="mine-row"><text class="mine-label">日期</text><text class="mine-value">{{item.date}}</text></view>
+        <view class="mine-row"><text class="mine-label">人数</text><text class="mine-value">{{item.count}} 人</text></view>
+        <view class="mine-row" wx:if="{{item.note}}"><text class="mine-label">备注</text><text class="mine-value">{{item.note}}</text></view>
+      </view>
+      <view class="mine-time">提交于 {{item.createdAtText || item.timestampText || ''}}</view>
+    </view>
+  </view>
+
+  <!-- 预约表单弹层 -->
+  <view class="form-mask" wx:if="{{selectedActivity}}" catchtap="closeForm">
+    <view class="form-card" catchtap="noop">
+      <view class="form-head">
+        <text class="form-title">📋 预约 · {{selectedActivity.name}}</text>
+        <text class="form-close" bindtap="closeForm">✕</text>
+      </view>
+
+      <view class="form-section">
+        <view class="form-row">
+          <text class="form-label">姓名</text>
+          <input class="form-input" placeholder="请输入姓名" value="{{form.name}}" data-field="name" bindinput="onFormInput" />
+        </view>
+        <view class="form-row">
+          <text class="form-label">手机</text>
+          <input class="form-input" type="number" placeholder="11 位手机号" value="{{form.phone}}" data-field="phone" bindinput="onFormInput" />
+        </view>
+        <view class="form-row">
+          <text class="form-label">日期</text>
+          <picker mode="date" value="{{form.date}}" start="{{today}}" bindchange="onFormInput" data-field="date">
+            <view class="form-input form-picker">{{form.date || '点击选日期'}}</view>
+          </picker>
+        </view>
+        <view class="form-row">
+          <text class="form-label">人数</text>
+          <input class="form-input" type="number" placeholder="1" value="{{form.count}}" data-field="count" bindinput="onCountChange" />
+        </view>
+        <view class="form-row form-row-top">
+          <text class="form-label">备注</text>
+          <textarea class="form-input form-textarea" placeholder="选填 (饮食 / 特殊要求)" value="{{form.note}}" data-field="note" bindinput="onFormInput" />
+        </view>
+      </view>
+
+      <button class="form-submit" bindtap="onSubmit" disabled="{{submitting}}">{{submitting ? '提交中...' : '提交预约'}}</button>
+    </view>
+  </view>
 </view>

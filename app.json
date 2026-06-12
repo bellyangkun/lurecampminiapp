@@ -2,10 +2,11 @@
   "pages": [
     "pages/index/index",
     "pages/checkin/checkin",
-    "pages/coupons/coupons",
     "pages/booking/booking",
     "pages/ai/ai",
-    "pages/me/me"
+    "pages/me/me",
+    "pages/coupons/coupons",
+    "pages/login/login"
   ],
   "window": {
     "navigationBarTextStyle": "white",
@@ -22,8 +23,8 @@
     "list": [
       { "pagePath": "pages/index/index",   "text": "导航", "iconPath": "images/tab-home.png",     "selectedIconPath": "images/tab-home-on.png" },
       { "pagePath": "pages/checkin/checkin","text": "打卡", "iconPath": "images/tab-checkin.png",  "selectedIconPath": "images/tab-checkin-on.png" },
-      { "pagePath": "pages/coupons/coupons","text": "优惠", "iconPath": "images/tab-coupon.png",   "selectedIconPath": "images/tab-coupon-on.png" },
       { "pagePath": "pages/booking/booking","text": "预约", "iconPath": "images/tab-booking.png",  "selectedIconPath": "images/tab-booking-on.png" },
+      { "pagePath": "pages/ai/ai",         "text": "AI",   "iconPath": "images/tab-ai.png",       "selectedIconPath": "images/tab-ai-on.png" },
       { "pagePath": "pages/me/me",          "text": "我的", "iconPath": "images/tab-me.png",       "selectedIconPath": "images/tab-me-on.png" }
     ]
   },
