@@ -58,6 +58,50 @@ Page({
       this.setData({ points: app.globalData.points });
       this.refreshMarkers();
     }
+    // v0.7.4: 启动位置实时更新 (每 3 秒检查, 移动 >5m 重算 distance/route/最近POI)
+    this.startLocationWatch();
+  },
+
+  onHide() {
+    // v0.7.4: 离开主页时停掉轮询, 节省 CPU
+    this.stopLocationWatch();
+  },
+
+  onUnload() {
+    this.stopLocationWatch();
+  },
+
+  // v0.7.4: 实时位置监听 - 避免用户走动时 distance/walkMins 一直是旧值
+  startLocationWatch() {
+    if (this._locTimer) return;
+    this._locTimer = setInterval(() => {
+      const lat = app.globalData.userLat, lng = app.globalData.userLng;
+      if (lat == null || lng == null) return;
+      if (this._lastLat == null) {
+        this._lastLat = lat; this._lastLng = lng;
+        this.onLocationUpdate(lat, lng);
+        return;
+      }
+      // 移动 > 5m 才重算, 避免浪费
+      const moved = haversine(this._lastLat, this._lastLng, lat, lng);
+      if (moved >= 5) {
+        this._lastLat = lat; this._lastLng = lng;
+        this.onLocationUpdate(lat, lng);
+      }
+    }, 3000);
+  },
+
+  stopLocationWatch() {
+    if (this._locTimer) { clearInterval(this._locTimer); this._locTimer = null; }
+  },
+
+  onLocationUpdate(lat, lng) {
+    // 把最新位置缓存到 data (供 marker / onLocateTap 用)
+    this.setData({ userLat: lat, userLng: lng });
+    // 已选目标 → 重算 distance/walkMins/polyline
+    if (this.data.selectedDestId) {
+      this.drawRoute();
+    }
   },
 
   async loadPoints() {
@@ -142,7 +186,8 @@ Page({
 
   drawRoute() {
     const dest = this.data.points.find(p => p.id === this.data.selectedDestId);
-    const uLat = app.globalData.userLat, uLng = app.globalData.userLng;
+    // v0.7.4: 读 data 实时位置 (onLocationUpdate 每 3s 刷新)
+    const uLat = this.data.userLat, uLng = this.data.userLng;
     if (!dest) return;
     if (uLat != null && uLng != null) {
       const [dGjLng, dGjLat] = wgs84ToGcj02(dest.lng, dest.lat);
@@ -173,13 +218,15 @@ Page({
   },
 
   onLocateTap() {
-    if (app.globalData.userLat == null) {
+    // v0.7.4: 优先读 data 实时位置, 兜底 globalData
+    const lat = this.data.userLat, lng = this.data.userLng;
+    if (lat == null) {
       wx.showToast({ title: '定位中, 请稍候', icon: 'none' });
       return;
     }
     this.setData({
-      latitude: app.globalData.userLat,
-      longitude: app.globalData.userLng,
+      latitude: lat,
+      longitude: lng,
       scale: 16
     });
   },
