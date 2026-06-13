@@ -1,0 +1,74 @@
+<!-- pages/agreement/agreement.wxml - 鹿营小程序用户协议与隐私政策 -->
+<view class="page">
+  <view class="header">
+    <view class="title">鹿营小程序</view>
+    <view class="subtitle">用户协议与隐私政策</view>
+  </view>
+
+  <scroll-view class="content" scroll-y="true">
+    <view class="section">
+      <view class="section-title">一、我们如何收集和使用你的信息</view>
+      <view class="section-body">
+鹿营小程序（以下简称"我们"）尊重并保护用户隐私。本协议说明在你使用"鹿营"小程序服务时，我们如何收集、使用、存储和共享你的个人信息。
+
+        <view class="info-type">1. 位置信息</view>
+在以下场景中，我们会获取你的位置信息：
+（1）显示你在地图上的实时位置，用于推荐附近的目的地和规划路线；
+（2）当你在营地内拍照打卡时，用于判断打卡位置是否在合法打卡范围内。
+位置信息仅在小程序运行期间使用，<text class="hl">不会上传到服务器存储</text>，不会用于其他任何用途。
+
+        <view class="info-type">2. 相机/相册权限</view>
+仅在你主动点击"拍照打卡"按钮时触发，用于拍摄打卡照片。照片会上传到服务器用于显示打卡缩略图，<text class="hl">不会用于人脸识别或其他识别用途</text>。
+
+        <view class="info-type">3. 手机号码</view>
+仅在你主动选择"手机号登录"时收集，用于标识你的用户身份、关联你的优惠券和预约记录。<text class="hl">不会用于营销推广</text>。
+
+        <view class="info-type">4. 微信昵称/头像</view>
+仅在你主动授权"快捷登录"时获取，用于在小程序内显示你的昵称。<text class="hl">你可以拒绝授权, 不会影响使用</text>。
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">二、我们如何存储和保护你的信息</view>
+      <view class="section-body">
+（1）我们采用业界标准的加密传输（HTTPS）；
+（2）你的打卡照片、优惠券、预约记录存储在阿里云服务器，仅供你本人查询；
+（3）<text class="hl">我们不会将你的任何个人信息出售给第三方</text>。
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">三、你的权利</view>
+      <view class="section-body">
+（1）随时查看、修改你的个人资料；
+（2）随时注销账户，删除你的所有数据；
+（3）随时撤回授权，停止我们继续收集你的信息。
+
+如需行使上述权利，请联系客服热线：<text class="hl">021-59978686</text>。
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">四、本协议的变更</view>
+      <view class="section-body">
+我们可能根据业务调整修订本协议。重大变更会通过小程序弹窗等方式通知你。 继续使用服务即表示同意变更后的协议。
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">五、联系我们</view>
+      <view class="section-body">
+上海鹿营乡悦俱乐部
+地址：上海市青浦区朱家角镇沈太路 2588 弄乡悦华亭度假村
+电话：<text class="hl">021-59978686</text>
+      </view>
+    </view>
+
+    <view class="footer-tip">最后更新日期: 2026-06-13</view>
+  </scroll-view>
+
+  <view class="bottom-bar">
+    <button class="agree-btn" bindtap="onAgree">我已阅读并同意</button>
+    <button class="disagree-btn" bindtap="onDisagree">不同意</button>
+  </view>
+</view>

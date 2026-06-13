@@ -6,7 +6,8 @@
     "pages/ai/ai",
     "pages/me/me",
     "pages/coupons/coupons",
-    "pages/login/login"
+    "pages/login/login",
+    "pages/agreement/agreement"
   ],
   "window": {
     "navigationBarTextStyle": "white",
@@ -37,6 +38,5 @@
       "desc": "用于显示你的位置, 推荐目的地和路线"
     }
   },
-  "requiredPrivateInfos": ["getLocation", "chooseLocation", "onLocationChange", "startLocationUpdate"],
-  "__usePrivacyCheck__": true
+  "requiredPrivateInfos": ["getLocation", "chooseLocation", "onLocationChange", "startLocationUpdate"]
 }

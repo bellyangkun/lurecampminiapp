@@ -50,6 +50,12 @@ Page({
 
   onLoad() {
     this.loadPoints();
+    // v0.7.5: 协议未同意时, 启动 app.js 检测
+    if (!wx.getStorageSync('campsite_privacy_agreed')) {
+      app.checkPrivacyAgreement().then(agreed => {
+        if (agreed) this.startLocationWatch();
+      });
+    }
   },
 
   onShow() {
@@ -57,6 +63,13 @@ Page({
     if (app.globalData.points && app.globalData.points.length) {
       this.setData({ points: app.globalData.points });
       this.refreshMarkers();
+    }
+    // v0.7.5: 协议未同意时, 启动 app.js 检测流程 (会弹 modal → 跳 agreement 页)
+    if (!wx.getStorageSync('campsite_privacy_agreed')) {
+      app.checkPrivacyAgreement().then(agreed => {
+        if (agreed) this.startLocationWatch();
+      });
+      return;
     }
     // v0.7.4: 启动位置实时更新 (每 3 秒检查, 移动 >5m 重算 distance/route/最近POI)
     this.startLocationWatch();

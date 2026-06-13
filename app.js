@@ -25,7 +25,7 @@ App({
     });
   },
 
-  // v0.7.5: 隐私协议 - 检测 + 弹窗 + 持久化
+  // v0.7.5: 隐私协议 - 检测 + 弹窗 + 持久化 (走自实现 agreement 页, 不依赖微信原生 __usePrivacyCheck__)
   checkPrivacyAgreement() {
     return new Promise(resolve => {
       const stored = wx.getStorageSync('campsite_privacy_agreed');
@@ -34,59 +34,22 @@ App({
         resolve(true);
         return;
       }
-      // v0.7.5: 调用 wx.getPrivacySetting 检测平台是否需要弹
-      if (typeof wx.getPrivacySetting !== 'function') {
-        // 老基础库没这个 API, 直接放行 (开发期)
-        this.globalData.privacyAgreed = true;
-        resolve(true);
-        return;
-      }
-      wx.getPrivacySetting({
-        success: (res) => {
-          if (!res.needAuthorization) {
-            // 平台不要求, 放行
-            this.globalData.privacyAgreed = true;
-            wx.setStorageSync('campsite_privacy_agreed', true);
-            resolve(true);
-            return;
+      // 未同意 → 弹自定义 modal, 用户点查看协议 → 跳 agreement 页
+      wx.showModal({
+        title: '用户协议与隐私政策',
+        content: '鹿营小程序需要获取你的位置 (用于显示附近目的地和路线) 和相机权限 (用于拍照打卡)。\n\n请阅读并同意《用户协议》与《隐私政策》后继续使用。',
+        confirmText: '查看协议',
+        cancelText: '不同意并退出',
+        success: (m) => {
+          if (m.confirm) {
+            wx.navigateTo({ url: '/pages/agreement/agreement' });
+            // 跳到 agreement 页后, 用户点"我已阅读并同意"会写 storage, 不在这里 resolve
+            // 等下次 onShow 检查 (在 agreement 同意后)
+            setTimeout(() => resolve(false), 1000);
+          } else {
+            // 拒绝, 退出小程序
+            wx.exitMiniProgram({ success: () => resolve(false), fail: () => resolve(false) });
           }
-          // 需要用户同意, 弹 modal
-          wx.showModal({
-            title: '用户协议与隐私政策',
-            content: '鹿营小程序需要获取你的位置, 用于显示附近目的地和路线规划; 使用相机, 用于拍照打卡。\n\n请阅读并同意《用户协议》与《隐私政策》后继续使用。',
-            confirmText: '查看协议',
-            cancelText: '不同意并退出',
-            success: (m) => {
-              if (m.confirm) {
-                // 唤起微信原生隐私协议页
-                wx.openPrivacyContract({
-                  success: () => {
-                    // 唤起后等用户点同意/拒绝, 用 onNeedPrivacyAuthorization 回调
-                    this.globalData.privacyAgreed = true;
-                    wx.setStorageSync('campsite_privacy_agreed', true);
-                    this.startLocationWatch();
-                    resolve(true);
-                  },
-                  fail: () => {
-                    wx.showModal({
-                      title: '无法打开协议',
-                      content: '请到设置中允许"隐私协议"授权',
-                      showCancel: false
-                    });
-                    resolve(false);
-                  }
-                });
-              } else {
-                // 拒绝, 退出小程序
-                wx.exitMiniProgram({ success: () => resolve(false), fail: () => resolve(false) });
-              }
-            }
-          });
-        },
-        fail: () => {
-          // 检测失败, 放行 (开发期)
-          this.globalData.privacyAgreed = true;
-          resolve(true);
         }
       });
     });

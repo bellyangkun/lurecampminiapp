@@ -20,14 +20,8 @@ Page({
   },
 
   onAgreementTap() {
-    // v0.7.5: 唤起微信原生隐私协议页 (已配 __usePrivacyCheck__)
-    if (typeof wx.openPrivacyContract === 'function') {
-      wx.openPrivacyContract({ fail: () => {
-        wx.showModal({ title: '用户协议', content: '鹿营小程序用户协议: 用于位置显示、路线导航、拍照打卡。', showCancel: false });
-      }});
-    } else {
-      wx.showModal({ title: '用户协议', content: '鹿营小程序用户协议: 用于位置显示、路线导航、拍照打卡。', showCancel: false });
-    }
+    // v0.7.5: 跳自实现 agreement 页 (走 wx.navigateTo, 不依赖微信原生)
+    wx.navigateTo({ url: '/pages/agreement/agreement' });
   },
 
   onUnload() {
