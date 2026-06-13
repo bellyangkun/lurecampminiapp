@@ -64,6 +64,12 @@ Page({
       this.setData({ points: app.globalData.points });
       this.refreshMarkers();
     }
+    // v0.8.1: 如果 app.js 已经拿到定位, 立即同步到当前页, 避免按钮显示"定位中"
+    const gLat = app.globalData.userLat, gLng = app.globalData.userLng;
+    if (gLat != null && gLng != null) {
+      this.setData({ userLat: gLat, userLng: gLng });
+      this._lastLat = gLat; this._lastLng = gLng;
+    }
     // v0.7.5: 协议未同意时, 启动 app.js 检测流程 (会弹 modal → 跳 agreement 页)
     if (!wx.getStorageSync('campsite_privacy_agreed')) {
       app.checkPrivacyAgreement().then(agreed => {
@@ -236,16 +242,38 @@ Page({
   },
 
   onLocateTap() {
-    // v0.7.4: 优先读 data 实时位置, 兜底 globalData
-    const lat = this.data.userLat, lng = this.data.userLng;
+    // v0.8.1: 优先读 data 实时位置, 没有则立即取一次, 不再让用户干等
+    let lat = this.data.userLat, lng = this.data.userLng;
     if (lat == null) {
-      wx.showToast({ title: '定位中, 请稍候', icon: 'none' });
+      lat = app.globalData.userLat;
+      lng = app.globalData.userLng;
+    }
+    if (lat != null && lng != null) {
+      this.setData({ userLat: lat, userLng: lng });
+      this.onLocationUpdate(lat, lng);
+      this.setData({ latitude: lat, longitude: lng, scale: 16 });
       return;
     }
-    this.setData({
-      latitude: lat,
-      longitude: lng,
-      scale: 16
+    wx.showToast({ title: '正在获取定位...', icon: 'none' });
+    wx.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        const { latitude, longitude } = res;
+        app.globalData.userLat = latitude;
+        app.globalData.userLng = longitude;
+        this.setData({ userLat: latitude, userLng: longitude });
+        this.onLocationUpdate(latitude, longitude);
+        this.setData({ latitude, longitude, scale: 16 });
+      },
+      fail: (e) => {
+        console.warn('[Index] wx.getLocation 失败', e);
+        wx.showModal({
+          title: '定位失败',
+          content: '无法获取当前位置，请检查是否授权定位权限。',
+          confirmText: '去设置',
+          success: (m) => { if (m.confirm) wx.openSetting(); }
+        });
+      }
     });
   },
 

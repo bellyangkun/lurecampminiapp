@@ -103,16 +103,64 @@ App({
     });
   },
 
+  // v0.8.1: 启动位置实时更新, 先确保权限, 失败时降级用 wx.getLocation
   startLocationWatch() {
-    wx.startLocationUpdate({
-      success: () => {
-        wx.onLocationChange((res) => {
-          this.globalData.userLat = res.latitude;
-          this.globalData.userLng = res.longitude;
-        });
+    if (this._locationStarted) return;
+    this._locationStarted = true;
+
+    const doStart = () => {
+      wx.startLocationUpdate({
+        success: () => {
+          console.log('[App] startLocationUpdate 成功');
+          wx.onLocationChange((res) => {
+            this.globalData.userLat = res.latitude;
+            this.globalData.userLng = res.longitude;
+          });
+        },
+        fail: (e) => {
+          console.warn('[App] startLocationUpdate 失败, 降级用 wx.getLocation', e);
+          this._locationStarted = false;
+          this.fallbackGetLocation();
+        }
+      });
+    };
+
+    // 先检查权限
+    wx.getSetting({
+      success: (res) => {
+        const auth = res.authSetting['scope.userLocation'];
+        if (auth === false) {
+          // 之前被拒绝, 引导去设置页
+          console.warn('[App] 用户之前拒绝定位权限');
+          wx.showModal({
+            title: '需要定位权限',
+            content: '用于显示你的当前位置和附近目的地，请在设置中开启定位权限。',
+            confirmText: '去开启',
+            success: (m) => {
+              if (m.confirm) wx.openSetting();
+            }
+          });
+          return;
+        }
+        if (auth === true || auth == null) {
+          doStart();
+        }
+      },
+      fail: () => doStart()
+    });
+  },
+
+  // v0.8.1: 降级方案 - 用 wx.getLocation 取一次位置
+  fallbackGetLocation() {
+    wx.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        this.globalData.userLat = res.latitude;
+        this.globalData.userLng = res.longitude;
+        console.log('[App] wx.getLocation 成功', res.latitude, res.longitude);
       },
       fail: (e) => {
-        console.warn('[App] startLocationUpdate 失败', e);
+        console.warn('[App] wx.getLocation 也失败', e);
       }
     });
   },
