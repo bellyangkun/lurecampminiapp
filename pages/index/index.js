@@ -172,8 +172,9 @@ Page({
         latitude: gLat,
         longitude: gLng,
         title: p.name,
-        width: 32,
-        height: 32,
+        iconPath: `/images/markers/marker-${p.type || 'other'}.png`,
+        width: 40,
+        height: 40,
         callout: {
           content: p.name,
           color: '#fff',

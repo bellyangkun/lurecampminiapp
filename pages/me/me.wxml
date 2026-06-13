@@ -43,7 +43,7 @@
   <!-- 数据卡片 -->
   <view class="stats-section">
     <view class="stat-card" bindtap="onCheckinTap" hover-class="stat-card-active">
-      <text class="stat-num">{{stats.unique || 0}}</text>
+      <text class="stat-num">{{stats.latest.length || 0}}</text>
       <text class="stat-label">已打卡</text>
     </view>
     <view class="stat-card" bindtap="onCouponTap" hover-class="stat-card-active">

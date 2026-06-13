@@ -31,6 +31,7 @@ Page({
     ],
     activities: [],
     filteredActivities: [],
+    mine: [],
     selectedActivity: null,
     form: { name: '', phone: '', date: '', count: 1, note: '' },
     submitting: false,
@@ -41,6 +42,8 @@ Page({
     this.setData({ today: new Date().toISOString().split('T')[0] });
     if (this.data.activeTab === 'list') this.loadActivities();
     else this.loadMine();
+    // 静默刷新我的预约数量，用于顶部 tab 角标
+    this.refreshMineCount();
   },
 
   onTabTap(e) {
@@ -78,18 +81,23 @@ Page({
     }
   },
 
+  async refreshMineCount(silent = true) {
+    try {
+      const j = await getMyBookings(getUserId());
+      this.setData({ mine: (j.data && j.data.bookings) || [] });
+    } catch (e) {
+      if (!silent) wx.showToast({ title: '加载失败', icon: 'none' });
+      console.warn('[Booking] refresh mine failed', e);
+    }
+  },
+
   async loadMine() {
     // v0.8.0: 查看个人预约记录必须先登录
     if (!requireLogin('查看我的预约')) {
       this.setData({ activeTab: 'list', mine: [] });
       return;
     }
-    try {
-      const j = await getMyBookings(getUserId());
-      this.setData({ mine: (j.data && j.data.bookings) || [] });
-    } catch (e) {
-      wx.showToast({ title: '加载失败', icon: 'none' });
-    }
+    await this.refreshMineCount(false);
   },
 
   onBookTap(e) {

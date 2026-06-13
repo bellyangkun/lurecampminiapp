@@ -4,22 +4,31 @@ const { getUser, getUserId, setUser, clearUser, requireLogin } = require('../../
 const app = getApp();
 
 Page({
-  data: { user: null, stats: { unique: 0 }, couponCount: 0, bookingCount: 0 },
+  data: { user: null, stats: { unique: 0, latest: [] }, couponCount: 0, bookingCount: 0 },
 
   onShow() {
     const u = getUser();
     this.setData({ user: u });
 
-    // 已集印章
+    // 已集印章 / 累计打卡
     getCheckinStats(getUserId()).then(j => {
-      this.setData({ stats: j.data });
+      const stats = j.data || { unique: 0, latest: [] };
+      this.setData({ stats });
     }).catch(e => console.warn(e));
 
     // 可用优惠券数
     getMyCoupons({ userId: getUserId(), phone: u.phone || '' }).then(j => {
       const list = (j.data && j.data.coupons) || [];
       const now = Date.now();
-      const active = list.filter(c => c.status === 'active' && (!c.expiresAt || c.expiresAt > now));
+      const active = list.filter(c => {
+        const status = c.status || '';
+        // 兼容后端 used / unused / active 等状态，只要不是已使用就算可用
+        if (status === 'used') return false;
+        // 兼容 expireAt / expiresAt 两种字段名，统一转成时间戳比较
+        const expiresAt = c.expiresAt || c.expireAt;
+        const expTime = expiresAt ? new Date(expiresAt).getTime() : 0;
+        return !expTime || expTime > now;
+      });
       this.setData({ couponCount: active.length });
     }).catch(e => console.warn(e));
 
@@ -55,7 +64,7 @@ Page({
 
   onBookingTap() {
     if (!requireLogin('我的预约')) return;
-    wx.navigateTo({ url: '/pages/booking/booking' });
+    wx.switchTab({ url: '/pages/booking/booking' });
   },
 
   onCallTap() {

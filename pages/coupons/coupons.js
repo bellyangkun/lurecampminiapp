@@ -13,6 +13,8 @@ Page({
   onShow() {
     if (this.data.activeTab === 'all') this.loadTemplates();
     else this.loadMine();
+    // 静默刷新我的券数量，用于顶部 tab 角标
+    this.refreshMineCount();
   },
 
   onTabTap(e) {
@@ -39,6 +41,20 @@ Page({
     }
   },
 
+  async refreshMineCount(silent = true) {
+    try {
+      const u = wx.getStorageSync('campsite_user') || {};
+      const j = await getMyCoupons({ userId: getUserId(), phone: u.phone || '' });
+      this.setData({ mine: (j.data && j.data.coupons) || [] });
+    } catch (e) {
+      if (!silent) {
+        this.setData({ loading: false });
+        wx.showToast({ title: '加载失败', icon: 'none' });
+      }
+      console.warn('[Coupons] refresh mine failed', e);
+    }
+  },
+
   async loadMine() {
     // v0.8.0: 查看个人优惠券必须先登录
     if (!requireLogin('查看我的优惠券')) {
@@ -46,14 +62,8 @@ Page({
       return;
     }
     this.setData({ loading: true });
-    try {
-      const u = wx.getStorageSync('campsite_user') || {};
-      const j = await getMyCoupons({ userId: getUserId(), phone: u.phone || '' });
-      this.setData({ mine: (j.data && j.data.coupons) || [], loading: false });
-    } catch (e) {
-      this.setData({ loading: false });
-      wx.showToast({ title: '加载失败', icon: 'none' });
-    }
+    await this.refreshMineCount(false);
+    this.setData({ loading: false });
   },
 
   async onClaimTap(e) {
