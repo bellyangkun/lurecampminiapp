@@ -216,6 +216,11 @@ page {
 
 .menu-item-active { background: #f8fafc; }
 
+/* v0.7.7: 退出登录 - 红色警示色 */
+.logout-item .menu-text { color: #d32f2f; }
+.logout-item .menu-icon { color: #d32f2f; }
+.logout-item .menu-arrow { color: #d32f2f; }
+
 /* ===== 底部信息 ===== */
 .footer {
   text-align: center;

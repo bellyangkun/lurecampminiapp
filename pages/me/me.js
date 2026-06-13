@@ -1,6 +1,6 @@
 // pages/me/me.js
 const { getCheckinStats, getMyCoupons } = require('../../utils/api.js');
-const { getUser, getUserId } = require('../../utils/user.js');
+const { getUser, getUserId, clearUser } = require('../../utils/user.js');
 const app = getApp();
 
 Page({
@@ -43,5 +43,38 @@ Page({
 
   onCallTap() {
     wx.makePhoneCall({ phoneNumber: '021-59978686' });
+  },
+
+  // v0.7.7: 退出登录 - 二次确认 + 清缓存 + 重新生成 anonymousId + 刷新页面
+  onAgreementTap() {
+    wx.navigateTo({ url: '/pages/agreement/agreement' });
+  },
+
+  onLogoutTap() {
+    const u = getUser();
+    if (!u.loggedIn) {
+      wx.showToast({ title: '当前未登录', icon: 'none' });
+      return;
+    }
+    wx.showModal({
+      title: '退出登录',
+      content: '退出后将清除登录状态, 但不会删除已领取的优惠券和打卡记录。\n\n确定要退出吗?',
+      confirmText: '退出登录',
+      confirmColor: '#d32f2f',
+      cancelText: '取消',
+      success: (res) => {
+        if (!res.confirm) return;
+        // 1. 清掉 user 缓存
+        clearUser();
+        // 2. 同步 globalData
+        app.globalData.user = getUser();
+        // 3. 刷新页面
+        this.setData({ user: app.globalData.user });
+        // 4. toast 提示
+        wx.showToast({ title: '已退出登录', icon: 'success' });
+        // 5. 重新拉一次统计 (用新 anonymousId, 数字会重置, 因为打卡是按 userId 算的)
+        this.onShow();
+      }
+    });
   }
 });

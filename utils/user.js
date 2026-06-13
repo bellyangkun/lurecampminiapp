@@ -20,8 +20,13 @@ function setUser(u) {
   wx.setStorageSync(USER_KEY, u);
 }
 
+// v0.7.7: 退出登录 - 清掉 user 缓存, 下次 getUser() 会重新生成 anonymousId
+function clearUser() {
+  wx.removeStorageSync(USER_KEY);
+}
+
 function getUserId() {
   return getUser().userId;
 }
 
-module.exports = { getUser, setUser, getUserId, USER_KEY };
+module.exports = { getUser, setUser, clearUser, getUserId, USER_KEY };
