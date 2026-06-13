@@ -1,5 +1,6 @@
-// app.js
-const { getUser } = require('./utils/user.js');
+// app.js - v0.8.0
+const { getUser, setUser, getStableUserId, setStableUserId, setStableOpenid } = require('./utils/user.js');
+const { wxLogin } = require('./utils/api.js');
 
 App({
   onLaunch() {
@@ -7,20 +8,67 @@ App({
     const user = getUser();
     this.globalData.user = user;
 
-    // 微信登录拿 code
-    wx.login({
-      success: (res) => {
-        if (res.code) {
-          this.globalData.wxCode = res.code;
-          // TODO: 发到后端 /api/auth/wx-login 换 session (需要后端先实现该接口)
+    // v0.8.0: 若本地已登录, 启动时用 wx.login code 刷新服务端最新资料
+    // 保证换设备后头像/昵称/已领券/打卡/预约等数据一致
+    if (user && user.loggedIn) {
+      this.refreshUserFromServer();
+    } else {
+      // 未登录时也调用 wx.login, 把 code 暂存, 供登录页使用
+      wx.login({
+        success: (res) => {
+          if (res.code) {
+            this.globalData.wxCode = res.code;
+          }
         }
-      }
-    });
+      });
+    }
 
     // v0.7.5: 隐私协议检测 - 未同意先弹, 同意后才用定位/相机等接口
     this.checkPrivacyAgreement().then(agreed => {
       if (agreed) {
         this.startLocationWatch();
+      }
+    });
+  },
+
+  // v0.8.0: 用 wx.login code 调后端 /api/auth/wx-login, 刷新本地用户资料
+  refreshUserFromServer() {
+    wx.login({
+      success: (res) => {
+        if (!res.code) {
+          console.warn('[App] wx.login 未拿到 code, 跳过启动刷新');
+          return;
+        }
+        this.globalData.wxCode = res.code;
+        const anonymousId = getStableUserId();
+        wxLogin({ code: res.code, anonymousId })
+          .then((r) => {
+            if (r && r.code === 0 && r.user) {
+              const serverUser = r.user;
+              const localUser = getUser();
+              const newUser = {
+                ...localUser,
+                userId: serverUser.id || localUser.userId,
+                phone: serverUser.phone || r.phone || localUser.phone,
+                nickname: serverUser.nickname || localUser.nickname,
+                avatarUrl: serverUser.avatarUrl || localUser.avatarUrl,
+                openid: serverUser.openid || localUser.openid,
+                checkinCount: serverUser.checkinCount || localUser.checkinCount || 0,
+                loggedIn: true
+              };
+              setUser(newUser);
+              this.globalData.user = newUser;
+              if (newUser.openid) setStableOpenid(newUser.openid);
+              if (newUser.userId) setStableUserId(newUser.userId);
+              console.log('[App] 启动刷新用户资料成功', newUser.userId);
+            }
+          })
+          .catch((e) => {
+            console.warn('[App] 启动刷新用户资料失败', e);
+          });
+      },
+      fail: (e) => {
+        console.warn('[App] wx.login 失败', e);
       }
     });
   },

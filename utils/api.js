@@ -23,6 +23,8 @@ function request(path, options = {}) {
 module.exports = {
   API_BASE,
   request,
+
+  // 业务接口
   getPoints: () => request('/points'),
   getActivities: () => request('/activities'),
   getMyBookings: (userId) => request('/bookings?userId=' + encodeURIComponent(userId)),
@@ -89,7 +91,33 @@ module.exports = {
       });
     });
   },
+
+  // 登录/用户资料接口 (v0.8.0 统一收敛到这里, 移除各页面硬编码 :3005)
   sendSms: (phone) => request('/sms/send', { method: 'POST', data: { phone } }),
-  wxLogin: (code, phone) => request('/auth/login', { method: 'POST', data: { code, phone } }),
-  aiChat: (data) => request('/ai', { method: 'POST', data }),
+
+  // 微信 code 登录, 后端用 jscode2session 换 openid, 返回用户完整资料
+  wxLogin: ({ code, anonymousId, encryptedData, iv }) => request('/auth/wx-login', {
+    method: 'POST',
+    data: { code, anonymousId, encryptedData, iv }
+  }),
+
+  // 手机号 + 验证码登录
+  phoneLogin: ({ phone, code, anonymousId }) => request('/auth/login', {
+    method: 'POST',
+    data: { phone, code, anonymousId }
+  }),
+
+  // 更新用户昵称/头像 URL
+  updateProfile: (userId, { nickname, avatarUrl }) => request('/users/' + encodeURIComponent(userId) + '/profile', {
+    method: 'POST',
+    data: { nickname, avatarUrl }
+  }),
+
+  // 上传头像 base64, 返回永久 avatarUrl
+  uploadAvatar: (userId, avatarDataUrl) => request('/users/' + encodeURIComponent(userId) + '/avatar', {
+    method: 'POST',
+    data: { avatarDataUrl }
+  }),
+
+  aiChat: (data) => request('/ai', { method: 'POST', data })
 };

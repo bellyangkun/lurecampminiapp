@@ -1,12 +1,13 @@
-<!-- pages/profile-setup/profile-setup.wxml - 微信一键登录后, 让用户选微信头像 + 微信昵称 -->
+<!-- pages/profile-setup/profile-setup.wxml - v0.8.0
+     微信一键登录后, 让用户一键选择微信头像 + 微信昵称 -->
 <view class="page">
   <view class="header">
     <view class="title">完善资料</view>
-    <view class="subtitle">使用微信头像和昵称, 让度假村认识你</view>
+    <view class="subtitle">点击头像/昵称, 可一键使用微信默认头像和昵称</view>
   </view>
 
   <view class="card">
-    <!-- 微信头像: open-type=chooseAvatar 真机自动弹微信选头像 -->
+    <!-- 微信头像: open-type=chooseAvatar 真机自动弹微信选头像, 默认推荐微信头像 -->
     <view class="field">
       <view class="field-label">微信头像</view>
       <button
@@ -17,7 +18,7 @@
       >
         <image wx:if="{{avatarUrl}}" class="avatar-img" src="{{avatarUrl}}" mode="aspectFill" />
         <view wx:else class="avatar-placeholder">
-          <text class="placeholder-icon">📷</text>
+          <text class="placeholder-icon">👤</text>
           <text class="placeholder-text">点击选择微信头像</text>
         </view>
       </button>

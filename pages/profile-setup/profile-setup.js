@@ -1,6 +1,13 @@
-// pages/profile-setup/profile-setup.js - 微信一键登录后, 让用户选微信头像 + 微信昵称
+// pages/profile-setup/profile-setup.js - v0.8.0
+// 微信一键登录后, 引导用户选择微信头像 + 微信昵称
+// 因微信已禁止静默获取头像/昵称, 这里使用官方组件:
+//   - button open-type="chooseAvatar" 一键选择微信头像
+//   - input type="nickname" 一键选择微信昵称
+const { updateProfile, uploadAvatar } = require('../../utils/api.js');
 const { setUser, getUser } = require('../../utils/user.js');
 const app = getApp();
+
+const DEFAULT_NICKNAME = '微信用户';
 
 Page({
   data: {
@@ -11,7 +18,7 @@ Page({
   },
 
   onLoad() {
-    // 复用当前 user 已有值
+    // 优先复用服务端已有资料 (换设备登录时保持一致)
     const u = getUser();
     this.setData({
       avatarUrl: u.avatarUrl || '',
@@ -19,16 +26,16 @@ Page({
     });
   },
 
-  // v0.7.13: 微信选头像 - 真机弹原生选择器, 模拟器返回模拟路径
+  // 微信选头像 - 真机弹原生选择器, 默认推荐微信头像
   onChooseAvatar(e) {
     console.log('[profile-setup] chooseAvatar', e.detail);
     const tempPath = e.detail.avatarUrl;
     if (!tempPath) return;
-    // 微信返回的是临时路径 (http://tmp/...), 需上传到自己后端
+    // 微信返回的是临时路径 (http://tmp/...), 需提交时上传到自己后端
     this.setData({ avatarTempPath: tempPath, avatarUrl: tempPath });
   },
 
-  // v0.7.13: 微信昵称 - 真机弹原生选择器, 自动写入 input
+  // 微信昵称 - 真机弹原生选择器, 自动填入 input
   onNickBlur(e) {
     const nick = e.detail.value || '';
     console.log('[profile-setup] nickname blur:', nick);
@@ -37,62 +44,41 @@ Page({
 
   async onSubmit() {
     if (this.data.saving) return;
+
+    const nickname = this.data.nickname.trim() || DEFAULT_NICKNAME;
     if (!this.data.avatarTempPath && !this.data.avatarUrl) {
       wx.showToast({ title: '请选择微信头像', icon: 'none' });
       return;
     }
-    if (!this.data.nickname.trim()) {
-      wx.showToast({ title: '请填写微信昵称', icon: 'none' });
-      return;
-    }
+
     this.setData({ saving: true });
     try {
       const u = getUser();
       let finalAvatarUrl = this.data.avatarUrl;
 
-      // 如果有临时路径, 上传到自己后端 (微信临时路径几天就过期)
+      // 1. 若选了新头像, 先上传到自己后端 (微信临时 URL 会过期)
       if (this.data.avatarTempPath) {
         try {
-          const fs = wx.getFileSystemManager();
-          const localPath = `${wx.env.USER_DATA_PATH}/setup_avatar_${Date.now()}.jpg`;
-          fs.copyFileSync(this.data.avatarTempPath, localPath);
-          const buffer = fs.readFileSync(localPath);
-          const base64 = buffer.toString('base64');
-          const dataUrl = 'data:image/jpeg;base64,' + base64;
-          const j = await new Promise((resolve, reject) => {
-            wx.request({
-              url: 'https://lurecamp1.xiabebe.cn:3005/api/users/' + encodeURIComponent(u.userId) + '/avatar',
-              method: 'POST',
-              data: { avatarDataUrl: dataUrl },
-              success: r => resolve(r.data),
-              fail: reject
-            });
-          });
-          if (j && j.code === 0) {
-            finalAvatarUrl = j.data.avatarUrl;
+          const base64 = await this.tempPathToBase64(this.data.avatarTempPath);
+          const res = await uploadAvatar(u.userId, base64);
+          if (res && res.code === 0 && res.data && res.data.avatarUrl) {
+            finalAvatarUrl = res.data.avatarUrl;
           }
         } catch (uploadErr) {
           console.warn('[profile-setup] 头像上传失败, 用临时路径', uploadErr);
+          finalAvatarUrl = this.data.avatarUrl || this.data.avatarTempPath;
         }
       }
 
-      // 写后端更新 user.nickname
+      // 2. 同步到后端用户资料
       try {
-        await new Promise((resolve) => {
-          wx.request({
-            url: 'https://lurecamp1.xiabebe.cn:3005/api/users/' + encodeURIComponent(u.userId) + '/profile',
-            method: 'POST',
-            data: { nickname: this.data.nickname, avatarUrl: finalAvatarUrl },
-            success: resolve,
-            fail: resolve  // 不阻塞
-          });
-        });
-      } catch (e) {
-        console.warn('[profile-setup] 写后端失败', e);
+        await updateProfile(u.userId, { nickname, avatarUrl: finalAvatarUrl });
+      } catch (profileErr) {
+        console.warn('[profile-setup] 写后端失败', profileErr);
       }
 
-      // 写本地 user
-      const newUser = { ...u, nickname: this.data.nickname, avatarUrl: finalAvatarUrl };
+      // 3. 写本地 user
+      const newUser = { ...u, nickname, avatarUrl: finalAvatarUrl };
       setUser(newUser);
       app.globalData.user = newUser;
 
@@ -108,7 +94,31 @@ Page({
     }
   },
 
+  // 跳过设置: 给默认昵称, 头像留空由我的页显示占位
   onSkip() {
+    const u = getUser();
+    const nickname = this.data.nickname.trim() || DEFAULT_NICKNAME;
+    const newUser = { ...u, nickname, avatarUrl: u.avatarUrl || '' };
+    setUser(newUser);
+    app.globalData.user = newUser;
+    // 异步同步后端, 不阻塞跳转
+    updateProfile(u.userId, { nickname, avatarUrl: newUser.avatarUrl }).catch(() => {});
     wx.switchTab({ url: '/pages/me/me' });
+  },
+
+  // 把微信临时头像路径转成 base64 dataUrl
+  tempPathToBase64(tempPath) {
+    return new Promise((resolve, reject) => {
+      try {
+        const fs = wx.getFileSystemManager();
+        const localPath = `${wx.env.USER_DATA_PATH}/setup_avatar_${Date.now()}.jpg`;
+        fs.copyFileSync(tempPath, localPath);
+        const buffer = fs.readFileSync(localPath);
+        const base64 = buffer.toString('base64');
+        resolve('data:image/jpeg;base64,' + base64);
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
 });

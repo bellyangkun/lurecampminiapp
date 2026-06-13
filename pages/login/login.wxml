@@ -1,4 +1,4 @@
-<!--pages/login/login.wxml - v0.7.8 微信一键登录
+<!--pages/login/login.wxml - v0.8.0 微信一键登录
   - 顶部品牌区
   - 主按钮: 绿色微信图标"微信一键登录"
   - 次选项: 手机号+验证码 (折叠展开)
@@ -16,9 +16,9 @@
   <!-- 主登录卡 -->
   <view class="main-card">
     <view class="main-card-title">微信用户一键登录</view>
-    <view class="main-card-tip">点按钮后, 后台自动获取微信身份, 跨设备 ID 稳定</view>
+    <view class="main-card-tip">授权后自动获取微信身份, 换设备登录信息不变</view>
 
-    <!-- v0.7.21: 微信一键登录按钮 - 不带 open-type, 直接 bindtap 走 onWxLoginTap (调 wx-login, 用 stableOpenid + code, jscode2session 拿真 openid, 跨设备 ID 稳定) -->
+    <!-- v0.8.0: 微信一键登录按钮 - 调 wx.login 换 code, 后端用 openid 跨设备识别同一用户 -->
     <button
       class="wx-login-btn"
       bindtap="onWxLoginTap"

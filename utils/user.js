@@ -61,6 +61,12 @@ function getUserId() {
   return getUser().userId;
 }
 
+// v0.8.0: 判断是否已登录
+function isLoggedIn() {
+  const u = getUser();
+  return !!(u && u.loggedIn);
+}
+
 // v0.7.17: 业务动作前检查登录态 - 未登录弹 modal 提示, 跳登录页
 // 返回 true=已登录可继续, false=未登录已拦截
 // actionLabel: 业务名, e.g. '拍照打卡' / '领取优惠券' / '提交预约'
@@ -81,10 +87,17 @@ function requireLogin(actionLabel) {
   return false;
 }
 
+// v0.8.0: 未登录时弹窗并执行 callback(是否已登录)
+// 用于页面 onShow 等需要先判断再决定是否继续的场景
+function withLogin(actionLabel, callback) {
+  const ok = requireLogin(actionLabel);
+  if (typeof callback === 'function') callback(ok);
+  return ok;
+}
+
 module.exports = {
   getUser, setUser, clearUser, getUserId, USER_KEY,
   getStableOpenid, setStableOpenid, OPENID_KEY,
   getStableUserId, setStableUserId, USERID_KEY,
-  requireLogin
+  isLoggedIn, requireLogin, withLogin
 };
-

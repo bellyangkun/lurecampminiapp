@@ -1,4 +1,4 @@
-// pages/booking/booking.js - 活动预约
+// pages/booking/booking.js - v0.8.0 活动预约
 const { getActivities, getMyBookings, submitBooking } = require('../../utils/api.js');
 const { getUserId, requireLogin } = require('../../utils/user.js');
 
@@ -37,6 +37,11 @@ Page({
 
   onTabTap(e) {
     const tab = e.currentTarget.dataset.tab;
+    // v0.8.0: 切到"我的预约"必须先登录
+    if (tab === 'mine' && !requireLogin('查看我的预约')) {
+      this.setData({ activeTab: 'list' });
+      return;
+    }
     this.setData({ activeTab: tab });
     if (tab === 'list') this.loadActivities();
     else this.loadMine();
@@ -66,6 +71,11 @@ Page({
   },
 
   async loadMine() {
+    // v0.8.0: 查看个人预约记录必须先登录
+    if (!requireLogin('查看我的预约')) {
+      this.setData({ activeTab: 'list', mine: [] });
+      return;
+    }
     try {
       const j = await getMyBookings(getUserId());
       this.setData({ mine: (j.data && j.data.bookings) || [] });

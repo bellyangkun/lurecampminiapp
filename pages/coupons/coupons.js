@@ -1,4 +1,4 @@
-// pages/coupons/coupons.js
+// pages/coupons/coupons.js - v0.8.0 优惠券
 const { getCouponTemplates, getMyCoupons, issueCoupon } = require('../../utils/api.js');
 const { getUserId, requireLogin } = require('../../utils/user.js');
 
@@ -17,6 +17,11 @@ Page({
 
   onTabTap(e) {
     const tab = e.currentTarget.dataset.tab;
+    // v0.8.0: 切到"我的券"必须先登录
+    if (tab === 'mine' && !requireLogin('查看我的优惠券')) {
+      this.setData({ activeTab: 'all' });
+      return;
+    }
     this.setData({ activeTab: tab });
     if (tab === 'all') this.loadTemplates();
     else this.loadMine();
@@ -35,6 +40,11 @@ Page({
   },
 
   async loadMine() {
+    // v0.8.0: 查看个人优惠券必须先登录
+    if (!requireLogin('查看我的优惠券')) {
+      this.setData({ activeTab: 'all', mine: [], loading: false });
+      return;
+    }
     this.setData({ loading: true });
     try {
       const u = wx.getStorageSync('campsite_user') || {};
