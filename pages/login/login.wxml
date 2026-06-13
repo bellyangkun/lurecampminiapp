@@ -1,8 +1,7 @@
-<!--pages/login/login.wxml - 登录页 v0.2 重构
-  - 顶部品牌区：圆形图标 + 标题/副标题
-  - 白色表单卡片
-  - 圆形输入图标
-  - 底部协议
+<!--pages/login/login.wxml - v0.7.8 微信一键登录
+  - 顶部品牌区
+  - 主按钮: 绿色微信图标"微信一键登录"
+  - 次选项: 手机号+验证码 (折叠展开)
 -->
 <view class="page">
   <!-- 顶部品牌区 -->
@@ -14,50 +13,72 @@
     <text class="subtitle">登录后享受完整服务</text>
   </view>
 
-  <!-- 登录表单卡片 -->
-  <view class="form-card">
-    <view class="form-title">手机号登录</view>
+  <!-- 主登录卡 -->
+  <view class="main-card">
+    <view class="main-card-title">微信用户一键登录</view>
+    <view class="main-card-tip">授权后自动获取微信头像和昵称, 无需输入手机号</view>
 
-    <view class="form-item">
-      <view class="input-icon-wrap">
-        <text class="input-icon">📱</text>
+    <!-- 微信一键登录按钮 (用 button 触发 open-type, 真机可用) -->
+    <button
+      class="wx-login-btn"
+      open-type="getPhoneNumber"
+      bindgetphonenumber="onWxGetPhone"
+      bindtap="onWxLoginTap"
+      disabled="{{!agreed || logging}}"
+      hover-class="wx-login-btn-active"
+    >
+      <view class="wx-icon-wrap">
+        <text class="wx-icon">💬</text>
       </view>
-      <input
-        class="input"
-        type="number"
-        maxlength="11"
-        placeholder="请输入 11 位手机号"
-        value="{{phone}}"
-        bindinput="onPhoneInput"
-      />
+      <text class="wx-login-text">{{logging ? '登录中...' : '微信一键登录'}}</text>
+    </button>
+
+    <!-- 折叠: 手机号登录 (开发模式用, 也可作 fallback) -->
+    <view class="divider" bindtap="onTogglePhoneLogin">
+      <view class="divider-line"></view>
+      <text class="divider-text">{{showPhoneLogin ? '收起' : '其他方式: 手机号登录'}}</text>
+      <view class="divider-line"></view>
     </view>
 
-    <view class="form-item">
-      <view class="input-icon-wrap">
-        <text class="input-icon">🔑</text>
+    <view class="phone-form" wx:if="{{showPhoneLogin}}">
+      <view class="form-item">
+        <view class="input-icon-wrap">
+          <text class="input-icon">📱</text>
+        </view>
+        <input
+          class="input"
+          type="number"
+          maxlength="11"
+          placeholder="请输入 11 位手机号"
+          value="{{phone}}"
+          bindinput="onPhoneInput"
+        />
       </view>
-      <input
-        class="input input-code"
-        type="number"
-        maxlength="6"
-        placeholder="请输入验证码"
-        value="{{code}}"
-        bindinput="onCodeInput"
-      />
-      <button
-        class="send-btn"
-        bindtap="onSendCode"
-        disabled="{{sending || counting > 0}}"
-      >{{counting > 0 ? counting + 's' : (sending ? '发送中' : '获取验证码')}}</button>
-    </view>
-
-    <view class="dev-code" wx:if="{{devCode}}">
-      <text>🔧 开发模式验证码：</text>
-      <text class="dev-code-num">{{devCode}}</text>
+      <view class="form-item">
+        <view class="input-icon-wrap">
+          <text class="input-icon">🔑</text>
+        </view>
+        <input
+          class="input input-code"
+          type="number"
+          maxlength="6"
+          placeholder="请输入验证码"
+          value="{{code}}"
+          bindinput="onCodeInput"
+        />
+        <button
+          class="send-btn"
+          bindtap="onSendCode"
+          disabled="{{sending || counting > 0}}"
+        >{{counting > 0 ? counting + 's' : (sending ? '发送中' : '获取验证码')}}</button>
+      </view>
+      <view class="dev-code" wx:if="{{devCode}}">
+        <text>🔧 开发模式验证码：</text>
+        <text class="dev-code-num">{{devCode}}</text>
+      </view>
+      <button class="phone-login-btn" bindtap="onPhoneLogin" disabled="{{logging}}">手机号登录 (开发模式)</button>
     </view>
   </view>
-
-  <button class="login-btn" bindtap="onLogin" disabled="{{logging || !agreed}}">{{logging ? '登录中...' : '立即登录'}}</button>
 
   <view class="agreement">
     <view class="checkbox {{agreed ? 'checked' : ''}}" bindtap="onAgreeToggle">

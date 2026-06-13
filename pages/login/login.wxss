@@ -221,3 +221,145 @@ page {
   text-decoration: underline;
   margin: 0 4rpx;
 }
+
+/* ===== v0.7.8 微信一键登录 ===== */
+.main-card {
+  background: #fff;
+  border-radius: 24rpx;
+  margin: 32rpx;
+  padding: 40rpx 32rpx 32rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+}
+
+.main-card-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #2e7d32;
+  text-align: center;
+  margin-bottom: 12rpx;
+}
+
+.main-card-tip {
+  font-size: 22rpx;
+  color: #888;
+  text-align: center;
+  margin-bottom: 32rpx;
+  line-height: 1.5;
+}
+
+.wx-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #07c160;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+  border-radius: 50rpx;
+  height: 96rpx;
+  line-height: 96rpx;
+  border: none;
+  box-shadow: 0 6rpx 16rpx rgba(7, 193, 96, 0.3);
+  margin: 0;
+  padding: 0;
+}
+
+.wx-login-btn::after { border: none; }
+.wx-login-btn[disabled] { opacity: 0.6; }
+
+.wx-login-btn-active { background: #06ae56 !important; }
+
+.wx-icon-wrap {
+  width: 56rpx;
+  height: 56rpx;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16rpx;
+}
+
+.wx-icon {
+  font-size: 40rpx;
+  line-height: 1;
+}
+
+.wx-login-text {
+  line-height: 1;
+}
+
+/* 折叠分隔条 */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 32rpx 0 16rpx;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+  background: #e0e0e0;
+}
+
+.divider-text {
+  font-size: 22rpx;
+  color: #999;
+  margin: 0 16rpx;
+  white-space: nowrap;
+}
+
+/* 折叠的手机号表单 */
+.phone-form {
+  margin-top: 16rpx;
+}
+
+.phone-form .form-item {
+  background: #f5f5f5;
+  border-radius: 16rpx;
+  padding: 0 24rpx;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.phone-form .input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  background: transparent;
+}
+
+.phone-form .input-code {
+  margin-right: 12rpx;
+}
+
+.phone-form .send-btn {
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
+  background: #2e7d32;
+  color: #fff;
+  border-radius: 30rpx;
+  line-height: 1.4;
+  height: auto;
+  border: none;
+}
+
+.phone-form .send-btn::after { border: none; }
+.phone-form .send-btn[disabled] { opacity: 0.6; background: #999; }
+
+.phone-login-btn {
+  width: 100%;
+  padding: 24rpx 0;
+  background: #2e7d32;
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 600;
+  border-radius: 50rpx;
+  margin-top: 16rpx;
+  border: none;
+}
+
+.phone-login-btn::after { border: none; }
+.phone-login-btn[disabled] { opacity: 0.7; }
