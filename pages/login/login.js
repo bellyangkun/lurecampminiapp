@@ -127,42 +127,60 @@ Page({
     }
   },
 
-  // v0.7.8: 统一登录后处理 - 写 user storage + 跳主页
+  // v0.7.10: 统一登录后处理 - 写 user storage + 跳主页
+  // 关键: 用户 ID/nickname/avatarUrl/phone 全部以**后端返回为准** (后端是 source of truth)
+  // 这样: 退出登录 → 清 storage → 重新登录 → 后端用 openid 找回同一个 user → 信息不丢
   async doLogin({ code, phone, openid, encryptedData, iv }) {
     try {
-      // 真机流程: 把 code + encryptedData 发到后端 /api/auth/wx-login 拿 phone+openid
-      // 后端没实现前, 模拟器/开发期 fallback
-      let realPhone = phone;
-      let realOpenid = openid;
-      if (code && !realPhone) {
+      const oldUser = app.globalData.user || {};
+      let realPhone = phone || oldUser.phone || '';
+      let realOpenid = openid || oldUser.openid || '';
+      let serverUser = null;  // 后端返回的 user (有 id/nickname/avatarUrl/phone/checkinCount/createdAt)
+
+      // 真机 + 模拟器: 走 /api/auth/wx-login, 后端按 openid 找/建用户
+      if (code) {
         try {
           const j = await new Promise((resolve, reject) => {
             wx.request({
               url: 'https://lurecamp1.xiabebe.cn:3005/api/auth/wx-login',
               method: 'POST',
-              data: { code, encryptedData, iv },
+              data: { code, encryptedData, iv, anonymousId: oldUser.userId },
               success: r => resolve(r.data),
               fail: reject
             });
           });
-          if (j && j.data && j.data.phone) {
-            realPhone = j.data.phone;
-            realOpenid = j.data.openid || openid;
+          if (j && j.code === 0 && j.user) {
+            serverUser = j.user;
+            // 后端返的 phone 是脱敏的, 但 j.phone (顶层) 才是真值
+            realPhone = j.phone || j.user.phone || realPhone;
+            realOpenid = j.user.openid || realOpenid;
           }
         } catch (apiErr) {
           console.warn('[doLogin] /api/auth/wx-login 失败 (开发期忽略), 用 dev openid fallback', apiErr);
+          // fallback: dev_openid 本地派生 (用于开发期没接通后端时)
+          if (!realOpenid) realOpenid = 'dev_' + code.slice(0, 12);
         }
       }
-      // 构造 user 对象
-      const oldUser = app.globalData.user || {};
+
+      // 手机号登录分支: 调 /api/auth/login 校验验证码 + 找/建用户
+      if (phone && !code) {
+        // (手机号登录仍走原 sendSms 验证码, 此分支保留供旧流程)
+        // 没接 /api/auth/login 时, 本地生成 dev user
+      }
+
+      // 构造 user 对象 - 优先用后端 serverUser 字段
       const newUser = {
-        userId: oldUser.userId || ('u_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)),
-        phone: realPhone || oldUser.phone || '',
-        nickname: oldUser.nickname || '微信用户',
+        userId: (serverUser && serverUser.id) || oldUser.userId || ('u_' + realOpenid.slice(0, 12)),
+        phone: realPhone,
+        nickname: (serverUser && serverUser.nickname) || oldUser.nickname || '微信用户',
+        avatarUrl: (serverUser && serverUser.avatarUrl) || oldUser.avatarUrl || '',
         openid: realOpenid,
+        checkinCount: (serverUser && serverUser.checkinCount) || oldUser.checkinCount || 0,
+        createdAt: (serverUser && serverUser.createdAt) || oldUser.createdAt || Date.now(),
         loggedIn: true,
         loggedAt: Date.now()
       };
+
       // 写 storage + globalData
       setUser(newUser);
       app.globalData.user = newUser;
@@ -195,13 +213,42 @@ Page({
       return;
     }
     this.setData({ logging: true });
-    setTimeout(() => {
-      this.doLogin({ phone }).then(() => {
-        // doLogin 自己处理跳转
-      }).catch(e => {
-        this.setData({ logging: false });
-        wx.showToast({ title: '登录失败', icon: 'none' });
+    try {
+      const oldUser = app.globalData.user || {};
+      const j = await new Promise((resolve, reject) => {
+        wx.request({
+          url: 'https://lurecamp1.xiabebe.cn:3005/api/auth/login',
+          method: 'POST',
+          data: { phone, code, anonymousId: oldUser.userId },
+          success: r => resolve(r.data),
+          fail: reject
+        });
       });
-    }, 500);
+      if (j && j.code === 0 && j.user) {
+        // v0.7.10: 用后端返回的 user.id/nickname/avatarUrl/phone (source of truth)
+        const newUser = {
+          userId: j.user.id,
+          phone: j.phone || j.user.phone || phone,
+          nickname: j.user.nickname,
+          avatarUrl: j.user.avatarUrl || '',
+          openid: j.openid || j.user.openid || '',
+          checkinCount: j.user.checkinCount || 0,
+          createdAt: j.user.createdAt || Date.now(),
+          loggedIn: true,
+          loggedAt: Date.now()
+        };
+        setUser(newUser);
+        app.globalData.user = newUser;
+        this.setData({ logging: false });
+        wx.showToast({ title: '登录成功', icon: 'success' });
+        setTimeout(() => wx.switchTab({ url: '/pages/me/me' }), 800);
+      } else {
+        this.setData({ logging: false });
+        wx.showToast({ title: j.message || '登录失败', icon: 'none' });
+      }
+    } catch (e) {
+      this.setData({ logging: false });
+      wx.showToast({ title: '登录失败', icon: 'none' });
+    }
   }
 });
