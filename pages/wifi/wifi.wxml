@@ -27,12 +27,23 @@
     bindtap="onAutoConnect"
     loading="{{connecting}}"
     disabled="{{connecting}}"
-  >{{connecting ? '连接中...' : '一键自动连接'}}</button>
+  >{{connecting ? '连接中...' : '尝试自动连接'}}</button>
+
+  <!-- 二维码连接（最靠谱的一键方案） -->
+  <view class="qr-section" wx:if="{{ssid}}">
+    <text class="qr-title">📷 扫码一键连 WiFi</text>
+    <canvas
+      canvas-id="wifiQrCode"
+      class="qr-canvas"
+      style="width: 200px; height: 200px;"
+    />
+    <text class="qr-desc">用系统相机或微信扫一扫识别二维码，即可自动连接 WiFi</text>
+  </view>
 
   <view class="tips">
     <text class="tips-title">提示</text>
-    <text class="tips-item">1. 安卓手机通常可一键连接成功。</text>
-    <text class="tips-item">2. iPhone 需手动前往「设置 → WLAN」选择该网络并粘贴密码。</text>
-    <text class="tips-item">3. 连接失败时可直接复制密码手动连接。</text>
+    <text class="tips-item">1. 扫码连接：iOS / 安卓系统相机均可识别 WiFi 二维码。</text>
+    <text class="tips-item">2. 自动连接：部分安卓机型支持，iPhone 请优先扫码。</text>
+    <text class="tips-item">3. 手动连接：复制密码前往「设置 → WLAN」粘贴。</text>
   </view>
 </view>

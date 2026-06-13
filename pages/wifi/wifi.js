@@ -1,6 +1,7 @@
 // pages/wifi/wifi.js - 一键连接营地 WiFi
 // WiFi 配置优先从后端 /settings/wifi 获取，失败时使用本地兜底配置
 const { getCampWifi } = require('../../utils/api.js');
+const drawQrcode = require('../../utils/weapp-qrcode.js');
 
 const DEFAULT_WIFI = {
   ssid: 'XiangYueHuaTing-Guest',
@@ -23,11 +24,37 @@ Page({
         this.setData({
           ssid: j.data.ssid || DEFAULT_WIFI.ssid,
           password: j.data.password || DEFAULT_WIFI.password
-        });
+        }, () => this.drawWifiQr());
+      } else {
+        this.drawWifiQr();
       }
     }).catch(e => {
       console.warn('[WiFi] 拉取后台配置失败，使用默认配置', e);
+      this.drawWifiQr();
     });
+  },
+
+  onReady() {
+    this.drawWifiQr();
+  },
+
+  // 绘制 WiFi 连接二维码（iOS/安卓相机均可识别）
+  drawWifiQr() {
+    const { ssid, password } = this.data;
+    if (!ssid) return;
+    // 标准 WiFi 二维码格式
+    const text = `WIFI:T:WPA;S:${ssid};P:${password};H:false;;`;
+    try {
+      drawQrcode({
+        width: 200,
+        height: 200,
+        canvasId: 'wifiQrCode',
+        text,
+        correctLevel: 3 // H
+      });
+    } catch (e) {
+      console.warn('[WiFi] 绘制二维码失败', e);
+    }
   },
 
   onCopySsid() {
