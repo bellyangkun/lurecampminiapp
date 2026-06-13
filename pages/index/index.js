@@ -38,6 +38,9 @@ Page({
       { key: 'teahouse',   label: '茶馆',   icon: '🍵' },
       { key: 'other',      label: '其他',   icon: '📍' }
     ],
+    latitude: null,
+    longitude: null,
+    scale: 15,
     userLat: null,
     userLng: null,
     distance: null,
@@ -117,9 +120,10 @@ Page({
   onLocationUpdate(lat, lng) {
     // 把最新位置缓存到 data (供 marker / onLocateTap 用)
     this.setData({ userLat: lat, userLng: lng });
-    // 已选目标 → 重算 distance/walkMins/polyline
+    // 已选目标 → 重算 distance/walkMins/polyline，并调整地图视野
     if (this.data.selectedDestId) {
       this.drawRoute();
+      this.fitMapToPoints();
     }
   },
 
@@ -137,6 +141,7 @@ Page({
         app.globalData.points = points;
         this.setData({ points, loading: false });
         this.refreshMarkers();
+        this.fitMapToPoints();
         return;
       } catch (e) {
         console.warn(`[Index] 拉 POI 失败 (第 ${attempt}/2 次)`, e);
@@ -181,8 +186,8 @@ Page({
           fontSize: 11,
           borderRadius: 4,
           bgColor: '#2e7d32',
-          padding: 4,
-          display: 'BYCLICK'
+          padding: 6,
+          display: 'ALWAYS'
         }
       };
     });
@@ -207,6 +212,7 @@ Page({
     });
     this.refreshMarkers();
     this.drawRoute();
+    this.fitMapToPoints();
   },
 
   drawRoute() {
@@ -239,7 +245,43 @@ Page({
     });
     this.refreshMarkers();
     this.clearRoute();
+    this.fitMapToPoints();
     wx.showToast({ title: '已结束导航', icon: 'success' });
+  },
+
+  // 调整地图视野，让目标点/我的位置都尽量露出并居中
+  fitMapToPoints() {
+    const { points, selectedDestId, userLat, userLng, typeFilter } = this.data;
+    const include = [];
+
+    if (selectedDestId) {
+      // 导航中：只包含目标 + 我的位置
+      const dest = points.find(p => p.id === selectedDestId);
+      if (dest) {
+        const [gLng, gLat] = wgs84ToGcj02(dest.lng, dest.lat);
+        include.push({ latitude: gLat, longitude: gLng });
+      }
+    } else {
+      // 未导航：包含所有可见 POI
+      const visible = points.filter(p => typeFilter === 'all' || p.type === typeFilter);
+      visible.forEach(p => {
+        const [gLng, gLat] = wgs84ToGcj02(p.lng, p.lat);
+        include.push({ latitude: gLat, longitude: gLng });
+      });
+    }
+
+    // 包含我的位置
+    if (userLat != null && userLng != null) {
+      include.push({ latitude: userLat, longitude: userLng });
+    }
+
+    if (include.length === 0) return;
+
+    const ctx = wx.createMapContext('campMap', this);
+    ctx.includePoints({
+      points: include,
+      padding: [180, 80, 160, 80]  // 上右下左，避开顶部面板和底部按钮
+    });
   },
 
   onLocateTap() {

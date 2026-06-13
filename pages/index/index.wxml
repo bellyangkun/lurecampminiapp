@@ -8,12 +8,13 @@
 <view class="page">
   <!-- 地图 -->
   <map
+    id="campMap"
     class="map"
     latitude="{{latitude || 31.481527}}"
     longitude="{{longitude || 121.286954}}"
     markers="{{markers}}"
     polyline="{{polyline}}"
-    scale="15"
+    scale="{{scale || 15}}"
     show-location="{{true}}"
     enable-zoom="{{true}}"
     enable-scroll="{{true}}"
