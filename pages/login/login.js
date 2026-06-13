@@ -70,10 +70,11 @@ Page({
     }
   },
 
-  // v0.7.8: 微信一键登录 - 主流程
-  // 1. wx.login 拿 code (app.js onLaunch 已存过 globalData.wxCode)
-  // 2. 真机: open-type=getPhoneNumber 回调拿 encryptedData, iv, 手机号
-  // 3. 模拟器/开发期: 走 wx.login code 即可, 后端用 openid 识别
+  // v0.7.11: 微信一键登录 - 稳定 openid
+  // 关键修复: openid 必须稳定, 不能每次用 code 派生
+  // 真机: 第一次登录后, 后端会从 encryptedData 解密拿真实 openid, 缓存到 storage
+  // 模拟器: 用一个**本地随机生成的稳定 dev openid** (写 storage), 永不删 (除非清缓存)
+  // 退出登录**不清** openid, 重新登录时用同一个 openid → 后端找回同一 user → nickname 不变
   async onWxLoginTap() {
     if (!this.data.agreed) {
       wx.showToast({ title: '请先勾选同意用户协议', icon: 'none' });
@@ -81,7 +82,14 @@ Page({
     }
     this.setData({ logging: true });
     try {
-      // 拿最新的 wx login code
+      // 1. 拿稳定 openid (优先 storage 缓存)
+      let stableOpenid = wx.getStorageSync('campsite_openid');
+      if (!stableOpenid) {
+        // 第一次登录, 生成稳定 dev openid (写 storage, 永不删)
+        stableOpenid = 'dev_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        wx.setStorageSync('campsite_openid', stableOpenid);
+      }
+      // 2. 拿 wx.login code (即使 code 每次变, 我们用 stableOpenid 作 openid)
       const loginRes = await new Promise((resolve, reject) => {
         wx.login({ success: resolve, fail: reject });
       });
@@ -89,9 +97,8 @@ Page({
       if (!code) {
         throw new Error('wx.login 拿不到 code');
       }
-      // 直接用 openid 走"游客快速登录"分支 (后端 /api/auth/wx-quick-login 拿 openid 创建/找回用户)
-      // 真机拿手机号走 onWxGetPhone, 模拟器 fallback 拿不到手机号, 用 openid
-      await this.doLogin({ code, openid: 'dev_' + code.slice(0, 12) });
+      // 3. 用 stableOpenid 作 openid 登录 (后端按 openid 找/建 user)
+      await this.doLogin({ code, openid: stableOpenid });
     } catch (e) {
       console.error('[WxLogin] 失败', e);
       this.setData({ logging: false });
@@ -116,10 +123,16 @@ Page({
       const code = app.globalData.wxCode || await new Promise((resolve, reject) => {
         wx.login({ success: r => resolve(r.code), fail: reject });
       });
-      // 把 encryptedData/iv/code 都发到后端 /api/auth/wx-login
-      // 后端用微信 session_key 解密, 拿 phoneNumber + openid, 创建/找回用户
-      // 没接该接口前, 先用 encryptedData 模拟 phone
-      await this.doLogin({ code, encryptedData, iv, phone: 'wx_' + Date.now().toString(36) });
+      // v0.7.11: 用稳定 openid (从 storage 拿, 没有生成一个)
+      let stableOpenid = wx.getStorageSync('campsite_openid');
+      if (!stableOpenid) {
+        stableOpenid = 'dev_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        wx.setStorageSync('campsite_openid', stableOpenid);
+      }
+      // 把 encryptedData/iv/code/stableOpenid 都发到后端
+      // 后端解密 encryptedData 拿真 phoneNumber, 用 openid 找/建 user
+      // 不再传 phone 字段 (用后端解密结果)
+      await this.doLogin({ code, openid: stableOpenid, encryptedData, iv });
     } catch (err) {
       console.error('[WxGetPhone] 失败', err);
       this.setData({ logging: false });
@@ -184,6 +197,10 @@ Page({
       // 写 storage + globalData
       setUser(newUser);
       app.globalData.user = newUser;
+      // v0.7.11: 同步更新 stable openid 缓存 (后端返真 openid 时, 用真的覆盖 dev openid)
+      if (realOpenid) {
+        wx.setStorageSync('campsite_openid', realOpenid);
+      }
       // 同步 coupon 聚合 phone (v0.7.3 跨设备)
       // issue 接口在下次领券时自动合并 anonymousId 老券
       this.setData({ logging: false });
