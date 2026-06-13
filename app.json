@@ -7,7 +7,8 @@
     "pages/me/me",
     "pages/coupons/coupons",
     "pages/login/login",
-    "pages/agreement/agreement"
+    "pages/agreement/agreement",
+    "pages/profile-setup/profile-setup"
   ],
   "window": {
     "navigationBarTextStyle": "white",

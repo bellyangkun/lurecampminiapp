@@ -1,0 +1,46 @@
+<!-- pages/profile-setup/profile-setup.wxml - 微信一键登录后, 让用户选微信头像 + 微信昵称 -->
+<view class="page">
+  <view class="header">
+    <view class="title">完善资料</view>
+    <view class="subtitle">使用微信头像和昵称, 让度假村认识你</view>
+  </view>
+
+  <view class="card">
+    <!-- 微信头像: open-type=chooseAvatar 真机自动弹微信选头像 -->
+    <view class="field">
+      <view class="field-label">微信头像</view>
+      <button
+        class="avatar-btn"
+        open-type="chooseAvatar"
+        bindchooseavatar="onChooseAvatar"
+        hover-class="avatar-btn-active"
+      >
+        <image wx:if="{{avatarUrl}}" class="avatar-img" src="{{avatarUrl}}" mode="aspectFill" />
+        <view wx:else class="avatar-placeholder">
+          <text class="placeholder-icon">📷</text>
+          <text class="placeholder-text">点击选择微信头像</text>
+        </view>
+      </button>
+    </view>
+
+    <!-- 微信昵称: type=nickname 真机自动弹微信昵称选择 -->
+    <view class="field">
+      <view class="field-label">微信昵称</view>
+      <view class="nickname-wrap">
+        <input
+          class="nickname-input"
+          type="nickname"
+          value="{{nickname}}"
+          bindblur="onNickBlur"
+          placeholder="点击使用微信昵称"
+          placeholder-class="nickname-placeholder"
+        />
+      </view>
+    </view>
+  </view>
+
+  <view class="actions">
+    <button class="btn-primary" bindtap="onSubmit" disabled="{{saving}}">{{saving ? '保存中...' : '完成'}}</button>
+    <button class="btn-skip" bindtap="onSkip">暂不设置, 稍后再说</button>
+  </view>
+</view>

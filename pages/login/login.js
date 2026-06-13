@@ -2,7 +2,7 @@
 // 优先: 微信一键登录 (open-type=getPhoneNumber 真机拿手机号, 或 wx.login 拿 code 模拟器/开发期)
 // 备选: 手机号+验证码 (开发模式)
 const { sendSms } = require('../../utils/api.js');
-const { setUser } = require('../../utils/user.js');
+const { setUser, getUser } = require('../../utils/user.js');
 const app = getApp();
 
 Page({
@@ -206,7 +206,15 @@ Page({
       this.setData({ logging: false });
       wx.showToast({ title: '登录成功', icon: 'success' });
       setTimeout(() => {
-        wx.switchTab({ url: '/pages/me/me' });
+        // v0.7.13: 首次登录跳 profile-setup 让用户选微信头像+昵称
+        // 已登录过的用户 (storage 有 avatarUrl+非默认 nickname) 直接跳 me
+        const u = getUser();
+        const hasRealProfile = u.avatarUrl && u.nickname && !u.nickname.startsWith('微信用户');
+        if (hasRealProfile) {
+          wx.switchTab({ url: '/pages/me/me' });
+        } else {
+          wx.redirectTo({ url: '/pages/profile-setup/profile-setup' });
+        }
       }, 800);
     } catch (e) {
       this.setData({ logging: false });
@@ -258,7 +266,16 @@ Page({
         app.globalData.user = newUser;
         this.setData({ logging: false });
         wx.showToast({ title: '登录成功', icon: 'success' });
-        setTimeout(() => wx.switchTab({ url: '/pages/me/me' }), 800);
+        setTimeout(() => {
+          // v0.7.13: 手机号登录也走 profile-setup (用户可填昵称, 头像可后续换)
+          const u = getUser();
+          const hasRealProfile = u.avatarUrl && u.nickname && !u.nickname.startsWith('游客');
+          if (hasRealProfile) {
+            wx.switchTab({ url: '/pages/me/me' });
+          } else {
+            wx.redirectTo({ url: '/pages/profile-setup/profile-setup' });
+          }
+        }, 800);
       } else {
         this.setData({ logging: false });
         wx.showToast({ title: j.message || '登录失败', icon: 'none' });

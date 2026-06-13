@@ -1,0 +1,138 @@
+/* pages/profile-setup/profile-setup.wxss */
+.page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding-bottom: 40rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, #2e7d32, #388e3c);
+  color: #fff;
+  padding: 56rpx 32rpx 80rpx;
+  text-align: center;
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: 700;
+  margin-bottom: 12rpx;
+}
+
+.subtitle {
+  font-size: 26rpx;
+  opacity: 0.9;
+}
+
+.card {
+  background: #fff;
+  margin: -40rpx 24rpx 0;
+  border-radius: 24rpx;
+  padding: 40rpx 32rpx;
+  box-shadow: 0 6rpx 20rpx rgba(0,0,0,0.08);
+}
+
+.field {
+  margin-bottom: 40rpx;
+}
+
+.field-label {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+
+.avatar-btn {
+  display: block;
+  width: 200rpx;
+  height: 200rpx;
+  margin: 0 auto;
+  padding: 0;
+  background: #f5f7fa;
+  border: 4rpx dashed #c8e6c9;
+  border-radius: 50%;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.avatar-btn::after { border: none; }
+
+.avatar-btn-active { background: #e8f5e9; }
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: block;
+}
+
+.avatar-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  color: #999;
+}
+
+.placeholder-icon {
+  font-size: 56rpx;
+  line-height: 1;
+  margin-bottom: 8rpx;
+}
+
+.placeholder-text {
+  font-size: 22rpx;
+}
+
+.nickname-wrap {
+  border: 2rpx solid #e0e0e0;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  background: #fafafa;
+}
+
+.nickname-input {
+  font-size: 30rpx;
+  color: #333;
+  width: 100%;
+  height: 44rpx;
+}
+
+.nickname-placeholder {
+  color: #999;
+}
+
+.actions {
+  padding: 40rpx 32rpx 0;
+}
+
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #2e7d32, #388e3c);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+  border-radius: 50rpx;
+  height: 96rpx;
+  line-height: 96rpx;
+  border: none;
+  margin-bottom: 16rpx;
+}
+
+.btn-primary::after { border: none; }
+.btn-primary[disabled] { opacity: 0.6; }
+
+.btn-skip {
+  width: 100%;
+  background: transparent;
+  color: #999;
+  font-size: 26rpx;
+  border-radius: 50rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  border: none;
+}
+
+.btn-skip::after { border: none; }
