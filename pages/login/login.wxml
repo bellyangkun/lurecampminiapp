@@ -16,13 +16,11 @@
   <!-- 主登录卡 -->
   <view class="main-card">
     <view class="main-card-title">微信用户一键登录</view>
-    <view class="main-card-tip">授权后自动获取微信头像和昵称, 无需输入手机号</view>
+    <view class="main-card-tip">点按钮后, 后台自动获取微信身份, 跨设备 ID 稳定</view>
 
-    <!-- 微信一键登录按钮 (用 button 触发 open-type, 真机可用) -->
+    <!-- v0.7.21: 微信一键登录按钮 - 不带 open-type, 直接 bindtap 走 onWxLoginTap (调 wx-login, 用 stableOpenid + code, jscode2session 拿真 openid, 跨设备 ID 稳定) -->
     <button
       class="wx-login-btn"
-      open-type="getPhoneNumber"
-      bindgetphonenumber="onWxGetPhone"
       bindtap="onWxLoginTap"
       disabled="{{!agreed || logging}}"
       hover-class="wx-login-btn-active"

@@ -112,8 +112,26 @@ Page({
       return;
     }
     if (!e.detail.encryptedData) {
-      // 用户拒绝授权手机号, 走 code fallback
-      console.log('[WxGetPhone] 用户拒绝手机号, 走 code fallback');
+      // v0.7.21: 用户拒绝授权手机号, 也走 wx-login (用 stableOpenid + code, 让 jscode2session 拿真 openid, 跨设备 ID 稳定)
+      console.log('[WxGetPhone] 用户拒绝手机号, 走 wx-login fallback (用 stableOpenid + code)');
+      this.setData({ logging: true });
+      try {
+        let stableOpenid = getStableOpenid();
+        if (!stableOpenid) {
+          stableOpenid = 'dev_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+          setStableOpenid(stableOpenid);
+        }
+        const code = app.globalData.wxCode || await new Promise((resolve, reject) => {
+          wx.login({ success: r => resolve(r.code), fail: reject });
+        });
+        if (!code) throw new Error('wx.login 拿不到 code');
+        const stableUserId = getStableUserId();
+        await this.doLogin({ code, openid: stableOpenid, anonymousId: stableUserId });
+      } catch (err) {
+        console.error('[WxGetPhone fallback] 失败', err);
+        this.setData({ logging: false });
+        wx.showToast({ title: '登录失败', icon: 'none' });
+      }
       return;
     }
     this.setData({ logging: true });
