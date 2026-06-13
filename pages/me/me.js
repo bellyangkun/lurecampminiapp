@@ -1,28 +1,42 @@
-// pages/me/me.js - 我的页 v0.8.0
-const { getCheckinStats, getMyCoupons, uploadAvatar, updateProfile } = require('../../utils/api.js');
+// pages/me/me.js - 我的页 v0.9.0
+const { getCheckinStats, getMyCoupons, getMyBookings, uploadAvatar, updateProfile } = require('../../utils/api.js');
 const { getUser, getUserId, setUser, clearUser, requireLogin } = require('../../utils/user.js');
 const app = getApp();
 
 Page({
-  data: { user: null, stats: { unique: 0 }, couponCount: 0 },
+  data: { user: null, stats: { unique: 0 }, couponCount: 0, bookingCount: 0 },
 
   onShow() {
-    this.setData({ user: getUser() });
+    const u = getUser();
+    this.setData({ user: u });
+
+    // 已集印章
     getCheckinStats(getUserId()).then(j => {
       this.setData({ stats: j.data });
     }).catch(e => console.warn(e));
-    const u = getUser();
+
+    // 可用优惠券数
     getMyCoupons({ userId: getUserId(), phone: u.phone || '' }).then(j => {
       const list = (j.data && j.data.coupons) || [];
-      // 只算未使用 + 未过期的
       const now = Date.now();
       const active = list.filter(c => c.status === 'active' && (!c.expiresAt || c.expiresAt > now));
       this.setData({ couponCount: active.length });
+    }).catch(e => console.warn(e));
+
+    // 我的预约数
+    getMyBookings(getUserId()).then(j => {
+      const list = (j.data && j.data.bookings) || [];
+      this.setData({ bookingCount: list.length });
     }).catch(e => console.warn(e));
   },
 
   onPhoneLoginTap() {
     wx.navigateTo({ url: '/pages/login/login' });
+  },
+
+  onEditProfileTap() {
+    if (!requireLogin('编辑资料')) return;
+    wx.navigateTo({ url: '/pages/profile-setup/profile-setup' });
   },
 
   onCouponTap() {
@@ -67,15 +81,10 @@ Page({
       cancelText: '取消',
       success: (res) => {
         if (!res.confirm) return;
-        // 1. 清掉 user 缓存
         clearUser();
-        // 2. 同步 globalData
         app.globalData.user = getUser();
-        // 3. 刷新页面
         this.setData({ user: app.globalData.user });
-        // 4. toast 提示
         wx.showToast({ title: '已退出登录', icon: 'success' });
-        // 5. 重新拉一次统计 (用新 anonymousId, 数字会重置, 因为打卡是按 userId 算的)
         this.onShow();
       }
     });
@@ -104,7 +113,6 @@ Page({
 
   // 微信原生选头像 (2.21.2+ 基础库)
   chooseWxAvatar() {
-    // 跳转到资料页, 利用 open-type=chooseAvatar 选择微信头像
     wx.navigateTo({ url: '/pages/profile-setup/profile-setup' });
   },
 
@@ -125,7 +133,6 @@ Page({
         this.uploadAvatar(tempFile.tempFilePath);
       }
     } catch (e) {
-      // 用户取消
       console.log('[Avatar] 选图取消', e);
     }
   },
@@ -157,18 +164,14 @@ Page({
     const u = getUser();
     wx.showLoading({ title: '上传中...' });
     try {
-      // 1. 选本地永久路径
       const fs = wx.getFileSystemManager();
       const localPath = `${wx.env.USER_DATA_PATH}/avatar_${Date.now()}.jpg`;
       fs.copyFileSync(tempFilePath, localPath);
-      // 2. 读 base64
       const buffer = fs.readFileSync(localPath);
       const base64 = 'data:image/jpeg;base64,' + buffer.toString('base64');
-      // 3. 发到后端
       const j = await uploadAvatar(u.userId, base64);
       wx.hideLoading();
       if (j && j.code === 0 && j.data && j.data.avatarUrl) {
-        // 4. 同步后端 profile, 缓存到本地, 刷新 UI
         const avatarUrl = j.data.avatarUrl;
         await updateProfile(u.userId, { nickname: u.nickname, avatarUrl }).catch(() => {});
         const newUser = { ...getUser(), avatarUrl };

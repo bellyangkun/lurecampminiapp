@@ -1,99 +1,104 @@
-<!--pages/me/me.wxml - 我的页 v0.2 重构
-  - 顶部绿渐变资料头
-  - 重叠式统计卡片
-  - 分组菜单列表
-  - 底部度假村信息
+<!--pages/me/me.wxml - 我的页 v0.9.0 重构
+  设计方向:
+  - 沉浸式顶部渐变 + 圆形头像
+  - 会员/编辑资料入口
+  - 3 列数据卡片
+  - 4 宫格快捷入口
+  - 简洁服务列表
 -->
 <view class="page">
   <!-- 顶部资料头 -->
   <view class="header">
     <view class="header-bg"></view>
-    <view class="profile">
+    <view class="header-content">
+      <!-- 头像 -->
       <view class="avatar-wrap" bindtap="onAvatarTap">
-        <!-- v0.7.9: 有 avatarUrl 显示微信头像, 兜底用 emoji -->
-        <image wx:if="{{user.avatarUrl}}" class="avatar-img" src="{{user.avatarUrl}}" mode="aspectFill" />
-        <text wx:else class="avatar">{{user.loggedIn ? '👤' : '🏕️'}}</text>
-        <view wx:if="{{user.loggedIn}}" class="avatar-edit-badge">📷</view>
+        <image wx:if="{{user.avatarUrl}}" class="avatar" src="{{user.avatarUrl}}" mode="aspectFill" />
+        <view wx:else class="avatar avatar-placeholder">
+          <text class="avatar-emoji">{{user.loggedIn ? '👤' : '🏕️'}}</text>
+        </view>
+        <view wx:if="{{user.loggedIn}}" class="avatar-edit">
+          <text>编辑</text>
+        </view>
       </view>
-      <view class="info">
+
+      <!-- 用户信息 -->
+      <view class="info-wrap">
         <text class="nickname">{{user.nickname || '游客'}}</text>
-        <text class="uid">ID: {{user.userId}}</text>
+        <view class="meta-row">
+          <text class="uid">ID: {{user.userId}}</text>
+          <view wx:if="{{user.loggedIn}}" class="tag tag-member">会员</view>
+          <view wx:else class="tag tag-guest">未登录</view>
+        </view>
       </view>
-      <button
-        class="login-btn"
-        wx:if="{{!user.loggedIn}}"
-        bindtap="onPhoneLoginTap"
-        hover-class="login-btn-active"
-      >登录 / 注册</button>
-      <view wx:else class="login-badge">已登录</view>
+
+      <!-- 登录/编辑按钮 -->
+      <view class="action-wrap">
+        <button wx:if="{{!user.loggedIn}}" class="btn-login" bindtap="onPhoneLoginTap" hover-class="btn-active">登录 / 注册</button>
+        <button wx:else class="btn-edit" bindtap="onEditProfileTap" hover-class="btn-active">编辑资料</button>
+      </view>
     </view>
   </view>
 
-  <!-- 统计卡片 -->
-  <view class="stats-card">
-    <view class="stat-item" bindtap="onCheckinTap" hover-class="stat-item-active">
-      <text class="stat-icon">🏆</text>
+  <!-- 数据卡片 -->
+  <view class="stats-section">
+    <view class="stat-card" bindtap="onCheckinTap" hover-class="stat-card-active">
       <text class="stat-num">{{stats.unique || 0}}</text>
-      <text class="stat-label">已集印章</text>
+      <text class="stat-label">已打卡</text>
     </view>
-    <view class="stat-divider"></view>
-    <view class="stat-item" bindtap="onCouponTap" hover-class="stat-item-active">
-      <text class="stat-icon">🎫</text>
+    <view class="stat-card" bindtap="onCouponTap" hover-class="stat-card-active">
       <text class="stat-num">{{couponCount || 0}}</text>
       <text class="stat-label">优惠券</text>
     </view>
-    <view class="stat-divider"></view>
-    <view class="stat-item" bindtap="onBookingTap" hover-class="stat-item-active">
-      <text class="stat-icon">📅</text>
-      <text class="stat-num">0</text>
+    <view class="stat-card" bindtap="onBookingTap" hover-class="stat-card-active">
+      <text class="stat-num">{{bookingCount || 0}}</text>
       <text class="stat-label">我的预约</text>
     </view>
   </view>
 
-  <!-- 我的服务 -->
-  <view class="menu-card">
-    <view class="menu-title">我的服务</view>
-    <view class="menu-group">
-      <view class="menu-item" bindtap="onCouponTap" hover-class="menu-item-active">
-        <text class="menu-icon">🎫</text>
-        <text class="menu-text">我的优惠券</text>
-        <text class="menu-arrow">›</text>
-      </view>
-      <view class="menu-item" bindtap="onCheckinTap" hover-class="menu-item-active">
-        <text class="menu-icon">🏆</text>
-        <text class="menu-text">我的打卡</text>
-        <text class="menu-arrow">›</text>
-      </view>
-      <view class="menu-item" bindtap="onBookingTap" hover-class="menu-item-active">
-        <text class="menu-icon">📅</text>
-        <text class="menu-text">我的预约</text>
-        <text class="menu-arrow">›</text>
-      </view>
+  <!-- 快捷入口 -->
+  <view class="quick-section">
+    <view class="quick-item" bindtap="onCheckinTap" hover-class="quick-item-active">
+      <view class="quick-icon checkin">🏆</view>
+      <text class="quick-text">我的打卡</text>
+    </view>
+    <view class="quick-item" bindtap="onCouponTap" hover-class="quick-item-active">
+      <view class="quick-icon coupon">🎫</view>
+      <text class="quick-text">优惠券</text>
+    </view>
+    <view class="quick-item" bindtap="onBookingTap" hover-class="quick-item-active">
+      <view class="quick-icon booking">📅</view>
+      <text class="quick-text">我的预约</text>
+    </view>
+    <view class="quick-item" bindtap="onAiTap" hover-class="quick-item-active">
+      <view class="quick-icon ai">🤖</view>
+      <text class="quick-text">AI 客服</text>
     </view>
   </view>
 
-  <!-- 帮助与服务 -->
-  <view class="menu-card">
-    <view class="menu-title">帮助与服务</view>
-    <view class="menu-group">
-      <view class="menu-item" bindtap="onAiTap" hover-class="menu-item-active">
-        <text class="menu-icon">🤖</text>
-        <text class="menu-text">AI 客服</text>
-        <text class="menu-arrow">›</text>
-      </view>
-      <view class="menu-item" bindtap="onCallTap" hover-class="menu-item-active">
-        <text class="menu-icon">📞</text>
+  <!-- 服务列表 -->
+  <view class="menu-section">
+    <view class="section-title">更多服务</view>
+    <view class="menu-list">
+      <view class="menu-row" bindtap="onCallTap" hover-class="menu-row-active">
+        <view class="menu-icon-wrap call">
+          <text class="menu-icon">📞</text>
+        </view>
         <text class="menu-text">呼叫前台</text>
         <text class="menu-extra">021-59978686</text>
+        <text class="menu-arrow">›</text>
       </view>
-      <view class="menu-item" bindtap="onAgreementTap" hover-class="menu-item-active">
-        <text class="menu-icon">📜</text>
+      <view class="menu-row" bindtap="onAgreementTap" hover-class="menu-row-active">
+        <view class="menu-icon-wrap agreement">
+          <text class="menu-icon">📜</text>
+        </view>
         <text class="menu-text">用户协议</text>
         <text class="menu-arrow">›</text>
       </view>
-      <!-- v0.7.7: 退出登录 - 仅已登录时显示 -->
-      <view class="menu-item logout-item" wx:if="{{user.loggedIn}}" bindtap="onLogoutTap" hover-class="menu-item-active">
-        <text class="menu-icon">🚪</text>
+      <view wx:if="{{user.loggedIn}}" class="menu-row logout" bindtap="onLogoutTap" hover-class="menu-row-active">
+        <view class="menu-icon-wrap logout">
+          <text class="menu-icon">🚪</text>
+        </view>
         <text class="menu-text">退出登录</text>
         <text class="menu-arrow">›</text>
       </view>
@@ -102,7 +107,7 @@
 
   <!-- 底部信息 -->
   <view class="footer">
-    <text class="footer-text">乡悦华亭度假村 · 霜竹公路 518 号</text>
-    <text class="footer-text">预约热线: (021) 59978686</text>
+    <text class="footer-brand">乡悦华亭度假村</text>
+    <text class="footer-text">霜竹公路 518 号 · 预约热线 021-59978686</text>
   </view>
 </view>
