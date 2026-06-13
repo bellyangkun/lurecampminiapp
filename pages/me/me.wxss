@@ -299,6 +299,7 @@ page {
 }
 
 .menu-icon-wrap.call { background: #e8f5e9; }
+.menu-icon-wrap.wifi { background: #e3f2fd; }
 .menu-icon-wrap.agreement { background: #fff3e0; }
 .menu-icon-wrap.logout { background: #ffebee; }
 

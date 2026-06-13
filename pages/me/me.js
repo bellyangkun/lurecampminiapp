@@ -75,6 +75,10 @@ Page({
     wx.navigateTo({ url: '/pages/agreement/agreement' });
   },
 
+  onWifiTap() {
+    wx.navigateTo({ url: '/pages/wifi/wifi' });
+  },
+
   // v0.7.9: 退出登录 - 二次确认 + 清缓存 + 重新生成 anonymousId + 刷新页面
   onLogoutTap() {
     const u = getUser();

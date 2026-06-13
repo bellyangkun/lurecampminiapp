@@ -88,6 +88,13 @@
         <text class="menu-extra">021-59978686</text>
         <text class="menu-arrow">›</text>
       </view>
+      <view class="menu-row" bindtap="onWifiTap" hover-class="menu-row-active">
+        <view class="menu-icon-wrap wifi">
+          <text class="menu-icon">📶</text>
+        </view>
+        <text class="menu-text">营地 WiFi</text>
+        <text class="menu-arrow">›</text>
+      </view>
       <view class="menu-row" bindtap="onAgreementTap" hover-class="menu-row-active">
         <view class="menu-icon-wrap agreement">
           <text class="menu-icon">📜</text>

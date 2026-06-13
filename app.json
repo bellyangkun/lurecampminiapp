@@ -8,7 +8,8 @@
     "pages/coupons/coupons",
     "pages/login/login",
     "pages/agreement/agreement",
-    "pages/profile-setup/profile-setup"
+    "pages/profile-setup/profile-setup",
+    "pages/wifi/wifi"
   ],
   "window": {
     "navigationBarTextStyle": "white",

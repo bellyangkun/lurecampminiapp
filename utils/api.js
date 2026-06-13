@@ -26,6 +26,8 @@ module.exports = {
 
   // 业务接口
   getPoints: () => request('/points'),
+  // v0.8.2: 获取营地 WiFi 配置（后台设置）
+  getCampWifi: () => request('/settings/wifi'),
   getActivities: () => request('/activities'),
   getMyBookings: (userId) => request('/bookings?userId=' + encodeURIComponent(userId)),
   submitBooking: (data) => request('/bookings', { method: 'POST', data }),

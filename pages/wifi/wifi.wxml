@@ -1,0 +1,38 @@
+<!--pages/wifi/wifi.wxml - 营地 WiFi 连接页-->
+<view class="page">
+  <view class="wifi-card">
+    <view class="wifi-icon">📶</view>
+    <text class="wifi-title">连接营地 WiFi</text>
+    <text class="wifi-desc">点击卡片可复制，或尝试一键自动连接</text>
+  </view>
+
+  <view class="info-card" bindtap="onCopySsid">
+    <view class="info-row">
+      <text class="info-label">WiFi 名称</text>
+      <text class="info-value">{{ssid}}</text>
+    </view>
+    <text class="info-hint">点击复制</text>
+  </view>
+
+  <view class="info-card" bindtap="onCopyPassword">
+    <view class="info-row">
+      <text class="info-label">WiFi 密码</text>
+      <text class="info-value">{{password}}</text>
+    </view>
+    <text class="info-hint">点击复制</text>
+  </view>
+
+  <button
+    class="connect-btn"
+    bindtap="onAutoConnect"
+    loading="{{connecting}}"
+    disabled="{{connecting}}"
+  >{{connecting ? '连接中...' : '一键自动连接'}}</button>
+
+  <view class="tips">
+    <text class="tips-title">提示</text>
+    <text class="tips-item">1. 安卓手机通常可一键连接成功。</text>
+    <text class="tips-item">2. iPhone 需手动前往「设置 → WLAN」选择该网络并粘贴密码。</text>
+    <text class="tips-item">3. 连接失败时可直接复制密码手动连接。</text>
+  </view>
+</view>
