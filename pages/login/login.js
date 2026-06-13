@@ -145,7 +145,8 @@ Page({
       const oldUser = app.globalData.user || {};
       let realPhone = phone || oldUser.phone || '';
       let realOpenid = openid || oldUser.openid || '';
-      let realAnonymousId = anonymousId || oldUser.userId || getStableUserId() || '';
+      // v0.7.16: 优先用 device-stable userId, 退出登录后仍能找回同一 user
+      let realAnonymousId = anonymousId || getStableUserId() || '';
       let serverUser = null;
 
       // 真机 + 模拟器: 走 /api/auth/wx-login, 后端按 openid 找/建用户
