@@ -118,24 +118,29 @@ Page({
   },
 
   async loadPoints() {
-    try {
-      // v0.1: 兜底 timeout, 避免 request 域名没配时一直挂住
-      const j = await Promise.race([
-        getPoints(),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000))
-      ]);
-      const points = (j.data && j.data.points) || (Array.isArray(j) ? j : []);
-      app.globalData.points = points;
-      this.setData({ points, loading: false });
-      this.refreshMarkers();
-    } catch (e) {
-      console.error('[Index] 拉 POI 失败', e);
-      this.setData({ loading: false });
-      wx.showModal({
-        title: 'POI 加载失败',
-        content: '可能原因:\n1. 后端没配 request 合法域名 (开发期勾选"不校验合法域名")\n2. lurecamp1.xiabebe.cn 后端未通',
-        showCancel: false
-      });
+    // v0.7.12: 30s timeout + 1 次重试 + 失败静默 (不弹 modal, 用 toast 短提示)
+    const TIMEOUT_MS = 30000;
+    const fetchWithTimeout = () => Promise.race([
+      getPoints(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), TIMEOUT_MS))
+    ]);
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const j = await fetchWithTimeout();
+        const points = (j.data && j.data.points) || (Array.isArray(j) ? j : []);
+        app.globalData.points = points;
+        this.setData({ points, loading: false });
+        this.refreshMarkers();
+        return;
+      } catch (e) {
+        console.warn(`[Index] 拉 POI 失败 (第 ${attempt}/2 次)`, e);
+        if (attempt < 2) {
+          await new Promise(r => setTimeout(r, 1500));
+        } else {
+          this.setData({ loading: false });
+          wx.showToast({ title: 'POI 加载失败, 下拉重试', icon: 'none', duration: 2500 });
+        }
+      }
     }
   },
 
