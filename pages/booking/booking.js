@@ -9,6 +9,14 @@ const KIND_META = {
   event:     { icon: '🎉', name: '主题' }
 };
 
+function fmtError(e) {
+  if (!e) return '提交失败';
+  if (e.message) return e.message;
+  if (e.errMsg) return e.errMsg;
+  if (e.data && e.data.message) return e.data.message;
+  return '提交失败';
+}
+
 Page({
   data: {
     activeTab: 'list',  // list | mine
@@ -92,12 +100,14 @@ Page({
     if (!a) return;
     // 预填用户身份信息
     const u = wx.getStorageSync('campsite_user') || {};
+    // v0.8.1: 默认日期优先用活动可预约 slots 第一天, 避免默认今天不在可选时段
+    const defaultDate = (a.slots && a.slots.length) ? a.slots[0] : this.data.today;
     this.setData({
       selectedActivity: a,
       form: {
         name: u.nickname || '',
         phone: u.phone || '',
-        date: this.data.today,
+        date: defaultDate,
         count: 1,
         note: ''
       }
@@ -128,23 +138,36 @@ Page({
     if (!date) { wx.showToast({ title: '请选日期', icon: 'none' }); return; }
     if (!count || count < 1) { wx.showToast({ title: '至少 1 人', icon: 'none' }); return; }
 
+    // v0.8.1: 客户端提前校验日期是否在活动 slots 内, 给出明确提示
+    const act = this.data.selectedActivity;
+    if (act && act.slots && act.slots.length && !act.slots.includes(date)) {
+      wx.showToast({ title: '该日期不在可选时段内: ' + act.slots.join(', '), icon: 'none' });
+      return;
+    }
+
     this.setData({ submitting: true });
     try {
-      const j = await submitBooking({
+      const payload = {
         userId: getUserId(),
-        activityId: this.data.selectedActivity.id,
-        activityName: this.data.selectedActivity.name,
+        activityId: act.id,
+        activityName: act.name,
         name, phone, date, count,
         note: this.data.form.note
-      });
-      if (j.code !== 0) throw new Error(j.message || '提交失败');
+      };
+      console.log('[Booking] submit payload', payload);
+      const j = await submitBooking(payload);
+      console.log('[Booking] submit response', j);
+      if (!j || j.code !== 0) {
+        throw new Error((j && j.message) || '提交失败');
+      }
       wx.showToast({ title: '预约成功, 等客服确认', icon: 'success' });
       this.closeForm();
       this.setData({ activeTab: 'mine' });
       this.loadMine();
     } catch (e) {
+      console.error('[Booking] submit error', e);
       this.setData({ submitting: false });
-      wx.showToast({ title: e.message || '提交失败', icon: 'none' });
+      wx.showToast({ title: fmtError(e), icon: 'none' });
     }
   }
 });
