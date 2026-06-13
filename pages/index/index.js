@@ -172,6 +172,7 @@ Page({
     });
     const markers = filtered.map(p => {
       const [gLng, gLat] = wgs84ToGcj02(p.lng, p.lat);
+      const isSelected = p.id === selectedDestId;
       return {
         id: pointIdToMarkerId[p.id],
         latitude: gLat,
@@ -187,7 +188,7 @@ Page({
           borderRadius: 4,
           bgColor: '#2e7d32',
           padding: 6,
-          display: 'ALWAYS'
+          display: isSelected ? 'ALWAYS' : 'BYCLICK'
         }
       };
     });
@@ -280,7 +281,7 @@ Page({
     const ctx = wx.createMapContext('campMap', this);
     ctx.includePoints({
       points: include,
-      padding: [180, 80, 160, 80]  // 上右下左，避开顶部面板和底部按钮
+      padding: [260, 60, 180, 60]  // 上右下左，加大顶部留白让目标点更靠下
     });
   },
 
