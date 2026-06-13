@@ -61,9 +61,30 @@ function getUserId() {
   return getUser().userId;
 }
 
+// v0.7.17: 业务动作前检查登录态 - 未登录弹 modal 提示, 跳登录页
+// 返回 true=已登录可继续, false=未登录已拦截
+// actionLabel: 业务名, e.g. '拍照打卡' / '领取优惠券' / '提交预约'
+function requireLogin(actionLabel) {
+  const u = getUser();
+  if (u.loggedIn) return true;
+  wx.showModal({
+    title: '需要登录',
+    content: `${actionLabel || '该操作'} 需要先登录才能继续。\n\n是否前往登录?`,
+    confirmText: '去登录',
+    cancelText: '取消',
+    success: (res) => {
+      if (res.confirm) {
+        wx.navigateTo({ url: '/pages/login/login' });
+      }
+    }
+  });
+  return false;
+}
+
 module.exports = {
   getUser, setUser, clearUser, getUserId, USER_KEY,
   getStableOpenid, setStableOpenid, OPENID_KEY,
-  getStableUserId, setStableUserId, USERID_KEY
+  getStableUserId, setStableUserId, USERID_KEY,
+  requireLogin
 };
 

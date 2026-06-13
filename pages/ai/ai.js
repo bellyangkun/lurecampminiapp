@@ -1,5 +1,6 @@
 // pages/ai/ai.js - AI 客服
 const { aiChat } = require('../../utils/api.js');
+const { requireLogin } = require('../../utils/user.js');
 const FAQS = require('../../utils/ai-faqs.js');
 
 Page({
@@ -35,6 +36,8 @@ Page({
   },
 
   async sendMessage() {
+    // v0.7.17: AI 对话必须登录
+    if (!requireLogin('AI 客服对话')) return;
     const text = (this.data.inputText || '').trim();
     if (!text || this.data.sending) return;
     // 用户消息

@@ -1,7 +1,7 @@
 // pages/index/index.js - 主页: 地图 + 目标 + 工具栏 + 拍照 fab
 const { wgs84ToGcj02, haversine } = require('../../utils/coords.js');
 const { getPoints, submitCheckin, shootPhoto } = require('../../utils/api.js');
-const { getUserId } = require('../../utils/user.js');
+const { getUserId, requireLogin } = require('../../utils/user.js');
 const app = getApp();
 
 const TYPE_META = {
@@ -275,6 +275,8 @@ Page({
   },
 
   onShootFabTap() {
+    // v0.7.17: 拍照打卡必须登录
+    if (!requireLogin('拍照打卡')) return;
     // 主动拍照打卡 (跳相机, 拍完弹确认面板)
     const uLat = app.globalData.userLat, uLng = app.globalData.userLng;
     if (uLat == null || uLng == null) {
@@ -330,6 +332,8 @@ Page({
   },
 
   async onShootSubmit() {
+    // v0.7.17: 防御性检查 (理论上 onShootFabTap 已拦截)
+    if (!requireLogin('提交打卡')) return;
     const { tempFilePath, point, isOther } = this.data.shootConfirm;
     const { uLat, uLng } = this._shootUCoords || {};
     this.setData({ 'shootConfirm.uploading': true });

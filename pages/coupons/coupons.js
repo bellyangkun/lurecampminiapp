@@ -1,6 +1,6 @@
 // pages/coupons/coupons.js
 const { getCouponTemplates, getMyCoupons, issueCoupon } = require('../../utils/api.js');
-const { getUserId } = require('../../utils/user.js');
+const { getUserId, requireLogin } = require('../../utils/user.js');
 
 Page({
   data: {
@@ -47,6 +47,8 @@ Page({
   },
 
   async onClaimTap(e) {
+    // v0.7.17: 领券必须登录
+    if (!requireLogin('领取优惠券')) return;
     const id = e.currentTarget.dataset.id;
     const tpl = this.data.templates.find(t => t.id === id);
     if (!tpl) return;

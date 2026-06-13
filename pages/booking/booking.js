@@ -1,6 +1,6 @@
 // pages/booking/booking.js - 活动预约
 const { getActivities, getMyBookings, submitBooking } = require('../../utils/api.js');
-const { getUserId } = require('../../utils/user.js');
+const { getUserId, requireLogin } = require('../../utils/user.js');
 
 const KIND_META = {
   activity:  { icon: '⛺', name: '活动' },
@@ -75,6 +75,8 @@ Page({
   },
 
   onBookTap(e) {
+    // v0.7.17: 点"立即预约"必须登录
+    if (!requireLogin('预约活动')) return;
     const id = e.currentTarget.dataset.id;
     const a = this.data.activities.find(x => x.id === id);
     if (!a) return;
@@ -108,6 +110,8 @@ Page({
   },
 
   async onSubmit() {
+    // v0.7.17: 提交预约必须登录
+    if (!requireLogin('提交预约')) return;
     const { name, phone, date, count } = this.data.form;
     if (!name) { wx.showToast({ title: '请填姓名', icon: 'none' }); return; }
     if (!/^1[3-9]\d{9}$/.test(phone)) { wx.showToast({ title: '请填正确手机号', icon: 'none' }); return; }
