@@ -9,8 +9,11 @@
   <view class="header">
     <view class="header-bg"></view>
     <view class="profile">
-      <view class="avatar-wrap">
-        <text class="avatar">🏕️</text>
+      <view class="avatar-wrap" bindtap="onAvatarTap">
+        <!-- v0.7.9: 有 avatarUrl 显示微信头像, 兜底用 emoji -->
+        <image wx:if="{{user.avatarUrl}}" class="avatar-img" src="{{user.avatarUrl}}" mode="aspectFill" />
+        <text wx:else class="avatar">{{user.loggedIn ? '👤' : '🏕️'}}</text>
+        <view wx:if="{{user.loggedIn}}" class="avatar-edit-badge">📷</view>
       </view>
       <view class="info">
         <text class="nickname">{{user.nickname || '游客'}}</text>
