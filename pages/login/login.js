@@ -11,7 +11,23 @@ Page({
     logging: false,
     counting: 0,
     devCode: '',
-    timer: null
+    timer: null,
+    agreed: false   // v0.7.5: 协议勾选状态, 未勾选不能登录
+  },
+
+  onAgreeToggle() {
+    this.setData({ agreed: !this.data.agreed });
+  },
+
+  onAgreementTap() {
+    // v0.7.5: 唤起微信原生隐私协议页 (已配 __usePrivacyCheck__)
+    if (typeof wx.openPrivacyContract === 'function') {
+      wx.openPrivacyContract({ fail: () => {
+        wx.showModal({ title: '用户协议', content: '鹿营小程序用户协议: 用于位置显示、路线导航、拍照打卡。', showCancel: false });
+      }});
+    } else {
+      wx.showModal({ title: '用户协议', content: '鹿营小程序用户协议: 用于位置显示、路线导航、拍照打卡。', showCancel: false });
+    }
   },
 
   onUnload() {
@@ -56,7 +72,11 @@ Page({
   },
 
   async onLogin() {
-    const { phone, code } = this.data;
+    const { phone, code, agreed } = this.data;
+    if (!agreed) {
+      wx.showToast({ title: '请先勾选同意用户协议', icon: 'none' });
+      return;
+    }
     if (!/^1[3-9]\d{9}$/.test(phone)) {
       wx.showToast({ title: '请填正确手机号', icon: 'none' });
       return;

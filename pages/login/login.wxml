@@ -57,10 +57,13 @@
     </view>
   </view>
 
-  <button class="login-btn" bindtap="onLogin" disabled="{{logging}}">{{logging ? '登录中...' : '立即登录'}}</button>
+  <button class="login-btn" bindtap="onLogin" disabled="{{logging || !agreed}}">{{logging ? '登录中...' : '立即登录'}}</button>
 
   <view class="agreement">
-    <text>登录即表示同意</text>
+    <view class="checkbox {{agreed ? 'checked' : ''}}" bindtap="onAgreeToggle">
+      <view wx:if="{{agreed}}" class="checkbox-inner">✓</view>
+    </view>
+    <text>我已阅读并同意</text>
     <text class="link" bindtap="onAgreementTap">《用户协议》</text>
     <text>和</text>
     <text class="link" bindtap="onAgreementTap">《隐私政策》</text>

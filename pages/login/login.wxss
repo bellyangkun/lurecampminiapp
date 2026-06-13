@@ -186,6 +186,34 @@ page {
   color: rgba(255, 255, 255, 0.8);
   margin-top: 32rpx;
   line-height: 1.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.checkbox {
+  width: 32rpx;
+  height: 32rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  margin-right: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.checkbox.checked {
+  background: #fff;
+  border-color: #fff;
+}
+
+.checkbox-inner {
+  color: #2e7d32;
+  font-size: 24rpx;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .link {

@@ -37,5 +37,6 @@
       "desc": "用于显示你的位置, 推荐目的地和路线"
     }
   },
-  "requiredPrivateInfos": ["getLocation", "chooseLocation", "onLocationChange", "startLocationUpdate"]
+  "requiredPrivateInfos": ["getLocation", "chooseLocation", "onLocationChange", "startLocationUpdate"],
+  "__usePrivacyCheck__": true
 }
