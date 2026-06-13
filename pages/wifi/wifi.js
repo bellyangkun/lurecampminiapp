@@ -7,6 +7,9 @@ const DEFAULT_WIFI = {
   password: '12345678'
 };
 
+// 连接超时时间（毫秒）
+const CONNECT_TIMEOUT = 10000;
+
 Page({
   data: {
     ssid: DEFAULT_WIFI.ssid,
@@ -41,32 +44,53 @@ Page({
     });
   },
 
-  // 尝试自动连接（安卓支持较好，iOS 通常失败）
+  // 一键自动连接：iOS 直接引导手动，安卓尝试自动连并加超时兜底
   onAutoConnect() {
     const { ssid, password } = this.data;
+    if (!ssid) {
+      wx.showToast({ title: 'WiFi 名称不能为空', icon: 'none' });
+      return;
+    }
+
+    // iOS 不支持小程序直接连 WiFi，直接引导手动
+    const systemInfo = wx.getSystemInfoSync();
+    if (systemInfo.platform === 'ios') {
+      this.showManualGuide();
+      return;
+    }
+
     this.setData({ connecting: true });
+    let timer = null;
+    let finished = false;
+
+    const finish = (success, errMsg) => {
+      if (finished) return;
+      finished = true;
+      if (timer) clearTimeout(timer);
+      this.setData({ connecting: false });
+      if (success) {
+        wx.showToast({ title: '连接成功', icon: 'success' });
+      } else {
+        console.warn('[WiFi] 自动连接失败', errMsg);
+        this.showManualGuide();
+      }
+    };
+
+    // 超时兜底：避免「正在搜索设备」一直卡住
+    timer = setTimeout(() => {
+      finish(false, 'timeout');
+    }, CONNECT_TIMEOUT);
 
     wx.startWifi({
       success: () => {
         wx.connectWifi({
           SSID: ssid,
           password: password,
-          success: () => {
-            this.setData({ connecting: false });
-            wx.showToast({ title: '连接成功', icon: 'success' });
-          },
-          fail: (e) => {
-            this.setData({ connecting: false });
-            console.warn('[WiFi] 自动连接失败', e);
-            this.showManualGuide();
-          }
+          success: () => finish(true),
+          fail: (e) => finish(false, e)
         });
       },
-      fail: (e) => {
-        this.setData({ connecting: false });
-        console.warn('[WiFi] 初始化 WiFi 失败', e);
-        this.showManualGuide();
-      }
+      fail: (e) => finish(false, e)
     });
   },
 
